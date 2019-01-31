@@ -7,6 +7,7 @@ import (
 var router *gin.Engine
 
 func Start() {
+	//gin.SetMode(gin.ReleaseMode)
 	router = gin.Default()
 	router.LoadHTMLGlob("web/templates/*")
 	initRoutes()
