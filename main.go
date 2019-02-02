@@ -2,10 +2,17 @@ package main
 
 import (
 	"microlog/web"
+	"sync"
 )
 
 func main() {
 
-	web.Start()
+	wg := &sync.WaitGroup{}
 
+	// start web server
+	wg.Add(1)
+	go web.Start()
+
+	// wait all goroutines
+	wg.Wait()
 }
