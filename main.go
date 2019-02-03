@@ -15,8 +15,7 @@ func main() {
 	go web.Start()
 
 	// start inputs
-	i, _ := input.Create("udp", ":8081")
-	go i.Start()
+	input.StartAll()
 
 	// wait all goroutines
 	wg.Wait()

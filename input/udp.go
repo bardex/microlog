@@ -2,30 +2,47 @@ package input
 
 import (
 	"fmt"
-	"log"
 	"net"
 )
 
-type Udp struct {
-	Addr string
+type udp struct {
+	addr     string
+	protocol string
+	error    string
+	active   bool
+	enabled  bool
 }
 
-func (udp *Udp) Start() {
-	/* Lets prepare a address at any address at port 10001*/
-	ServerAddr, err := net.ResolveUDPAddr("udp", udp.Addr)
+func CreateUdp(addr string, enabled bool) AbstractInput {
+	return &udp{
+		addr:     addr,
+		protocol: "udp",
+		active:   false,
+		enabled:  enabled,
+	}
+}
+
+// start listen
+func (udp *udp) Start() bool {
+	ServerAddr, err := net.ResolveUDPAddr("udp", udp.GetAddr())
 
 	if err != nil {
-		log.Fatal(err)
+		udp.error = err.Error()
+		return false
 	}
 
-	/* Now listen at selected port */
 	ServerConn, err := net.ListenUDP("udp", ServerAddr)
 
 	if err != nil {
-		log.Fatal(err)
+		udp.error = err.Error()
 	}
 
 	defer ServerConn.Close()
+
+	fmt.Println("Listen UDP on ", udp.GetAddr())
+
+	udp.active = true
+	udp.error = ""
 
 	buf := make([]byte, 1024)
 
@@ -37,5 +54,32 @@ func (udp *Udp) Start() {
 			fmt.Println("Error: ", err)
 		}
 	}
+}
 
+func (udp *udp) Shutdown() bool {
+	return true
+}
+
+func (udp *udp) IsActive() bool {
+	return udp.active
+}
+
+func (udp *udp) IsEnabled() bool {
+	return udp.enabled
+}
+
+func (udp *udp) GetError() string {
+	return udp.error
+}
+
+func (udp *udp) GetAddr() string {
+	return udp.addr
+}
+
+func (udp *udp) GetProtocol() string {
+	return udp.protocol
+}
+
+func (udp *udp) HasError() bool {
+	return udp.error != ""
 }

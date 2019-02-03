@@ -1,0 +1,42 @@
+{{ template "header.html" .}}
+
+
+<h1>Inputs</h1>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">Protocol</th>
+        <th scope="col">Address</th>
+        <th scope="col">Status</th>
+        <th scope="col">Operations</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{with .inputs }}
+    {{range . }}
+    <tr>
+        <td>{{ .Protocol }}</td>
+        <td>{{ .Address }}</td>
+        <td>
+            {{ if .Active }}<span class="badge badge-pill badge-success">Active</span>{{ else }}<span class="badge badge-pill badge-secondary">Inactive</span>{{end}}
+            {{ if .Disabled }}<span class="badge badge-pill badge-secondary">Disabled</span>{{end}}
+            {{ if .HasError }}
+                <span class="badge badge-pill badge-danger">Error</span>
+                <div>
+                    {{ .Error }}
+                </div>
+            {{end}}
+        </td>
+        <td>
+            <a href="{{ .ShowUrl }}" type="button" class="btn btn-primary">Show</a>
+        </td>
+    </tr>
+    {{end}}
+    {{end}}
+    <tr><td colspan="4"></td></tr>
+    </tbody>
+</table>
+
+
+{{ template "footer.html" .}}
