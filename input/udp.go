@@ -51,7 +51,7 @@ func (udp *udp) Start() bool {
 	buf := make([]byte, 1024)
 
 	for {
-		n, addr, err := ServerConn.ReadFromUDP(buf)
+		ServerConn.ReadFromUDP(buf)
 
 		b := bytes.NewReader(buf)
 		r, err := zlib.NewReader(b)
@@ -60,12 +60,9 @@ func (udp *udp) Start() bool {
 			panic(err)
 		}
 
+
 		io.Copy(os.Stdout, r)
 		r.Close()
-
-		if err != nil {
-			fmt.Println("Error: ", err)
-		}
 	}
 }
 
