@@ -3,6 +3,10 @@ package input
 import (
 	"fmt"
 	"net"
+	"compress/zlib"
+	"io"
+	"os"
+	"bytes"
 )
 
 type udp struct {
@@ -48,7 +52,16 @@ func (udp *udp) Start() bool {
 
 	for {
 		n, addr, err := ServerConn.ReadFromUDP(buf)
-		fmt.Println("Received ", string(buf[0:n]), " from ", addr)
+
+		b := bytes.NewReader(buf)
+		r, err := zlib.NewReader(b)
+
+		if err != nil {
+			panic(err)
+		}
+
+		io.Copy(os.Stdout, r)
+		r.Close()
 
 		if err != nil {
 			fmt.Println("Error: ", err)
