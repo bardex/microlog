@@ -1,12 +1,12 @@
 package input
 
 import (
-	"fmt"
-	"net"
-	"compress/zlib"
-	"io"
-	"os"
 	"bytes"
+	"compress/zlib"
+	"fmt"
+	"io"
+	"net"
+	"os"
 )
 
 type udp struct {
@@ -56,13 +56,10 @@ func (udp *udp) Start() bool {
 		b := bytes.NewReader(buf)
 		r, err := zlib.NewReader(b)
 
-		if err != nil {
-			panic(err)
+		if err == nil {
+			io.Copy(os.Stdout, r)
+			r.Close()
 		}
-
-
-		io.Copy(os.Stdout, r)
-		r.Close()
 	}
 }
 
