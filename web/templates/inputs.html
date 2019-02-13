@@ -6,6 +6,7 @@
 <table class="table">
     <thead>
     <tr>
+        <th scope="col">#</th>
         <th scope="col">Protocol</th>
         <th scope="col">Address</th>
         <th scope="col">Status</th>
@@ -16,11 +17,18 @@
     {{with .inputs }}
     {{range . }}
     <tr>
-        <td>{{ .Protocol }}</td>
-        <td>{{ .Address }}</td>
+        <td>{{ .GetId }}</td>
+        <td>{{ .GetProtocol }}</td>
+        <td>{{ .GetAddr }}</td>
         <td>
-            {{ if .Active }}<span class="badge badge-pill badge-success">Active</span>{{ else }}<span class="badge badge-pill badge-secondary">Inactive</span>{{end}}
-            {{ if .Disabled }}<span class="badge badge-pill badge-secondary">Disabled</span>{{end}}
+            {{ if .IsActive }}
+                <span class="badge badge-pill badge-success">Active</span>
+            {{ else }}
+                <span class="badge badge-pill badge-secondary">Inactive</span>
+            {{end}}
+            {{ if not .IsEnabled }}
+                <span class="badge badge-pill badge-secondary">Disabled</span>
+            {{end}}
             {{ if .HasError }}
                 <span class="badge badge-pill badge-danger">Error</span>
                 <div>
@@ -28,13 +36,26 @@
                 </div>
             {{end}}
         </td>
-        <td>
-            <a href="{{ .ShowUrl }}" type="button" class="btn btn-primary">Show</a>
+        <td class="row">
+            <div class="col-2">
+                <a href="/search" type="button" class="btn btn-primary">Show</a>
+            </div>
+            <div class="col-2">
+                {{ if .IsActive }}
+                    <form action="/input/stop/{{ .GetId }}" method="post">
+                        <input type="submit" class="btn btn-danger" value="Stop">
+                    </form>
+                {{ else }}
+                    <form action="/input/start/{{ .GetId }}" method="post">
+                        <input type="submit" class="btn btn-success" value="Start">
+                    </form>
+                {{ end}}
+            </div>
         </td>
     </tr>
     {{end}}
     {{end}}
-    <tr><td colspan="4"></td></tr>
+    <tr><td colspan="5"></td></tr>
     </tbody>
 </table>
 

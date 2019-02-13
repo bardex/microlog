@@ -10,29 +10,33 @@ import (
 )
 
 type udp struct {
+	id       int
 	addr     string
 	protocol string
 	error    string
 	active   bool
 	enabled  bool
+	ch       chan int
 }
 
-func CreateUdp(addr string, enabled bool) AbstractInput {
+func CreateUdp(id int, addr string, enabled bool) AbstractInput {
 	return &udp{
+		id:       id,
 		addr:     addr,
 		protocol: "udp",
 		active:   false,
 		enabled:  enabled,
+		ch:       make(chan int),
 	}
 }
 
 // start listen
-func (udp *udp) Start() bool {
+func (udp *udp) Start() {
 	ServerAddr, err := net.ResolveUDPAddr("udp", udp.GetAddr())
 
 	if err != nil {
 		udp.error = err.Error()
-		return false
+		return
 	}
 
 	ServerConn, err := net.ListenUDP("udp", ServerAddr)
@@ -50,21 +54,33 @@ func (udp *udp) Start() bool {
 
 	buf := make([]byte, 1024)
 
+loop:
 	for {
-		ServerConn.ReadFromUDP(buf)
+		select {
+		case signal := <-udp.ch:
+			switch signal {
+			case SIGNAL_STOP:
+				break loop
+			}
+		default:
+			ServerConn.ReadFromUDP(buf)
 
-		b := bytes.NewReader(buf)
-		r, err := zlib.NewReader(b)
+			b := bytes.NewReader(buf)
+			r, err := zlib.NewReader(b)
 
-		if err == nil {
-			io.Copy(os.Stdout, r)
-			r.Close()
+			if err == nil {
+				io.Copy(os.Stdout, r)
+				r.Close()
+			}
 		}
 	}
 }
 
-func (udp *udp) Shutdown() bool {
-	return true
+func (udp *udp) Shutdown() {
+	if udp.active {
+		udp.ch <- SIGNAL_STOP
+		udp.active = false
+	}
 }
 
 func (udp *udp) IsActive() bool {
@@ -81,6 +97,10 @@ func (udp *udp) GetError() string {
 
 func (udp *udp) GetAddr() string {
 	return udp.addr
+}
+
+func (udp *udp) GetId() int {
+	return udp.id
 }
 
 func (udp *udp) GetProtocol() string {
