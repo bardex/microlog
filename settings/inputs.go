@@ -104,11 +104,7 @@ func (inputs Inputs) Install() error {
 
 	sql := `DROP TABLE inputs`
 
-	_, err := db.Exec(sql)
-
-	if err != nil {
-		return err
-	}
+	db.Exec(sql)
 
 	sql = `CREATE TABLE inputs(
 	  id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
@@ -118,7 +114,7 @@ func (inputs Inputs) Install() error {
 	  date_edit DATETIME
 	)`
 
-	_, err = db.Exec(sql)
+	_, err := db.Exec(sql)
 	if err != nil {
 		return err
 	}
