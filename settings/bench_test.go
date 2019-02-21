@@ -12,7 +12,10 @@ import (
 // RUN this:  go test -bench . -benchmem  bench_test.go
 //
 
+const COUNT_INSERTS = 1000
+
 func BenchmarkEveryRowTransaction(b *testing.B) {
+	os.Remove("test.db")
 	db, err := sql.Open("sqlite3", "test.db")
 	if err != nil {
 		b.Fatal(err)
@@ -32,12 +35,14 @@ func BenchmarkEveryRowTransaction(b *testing.B) {
 	msg := strings.Repeat(" test ", 1000)
 
 	for i := 0; i < b.N; i++ {
-		tx, _ := db.Begin()
-		_, err := db.Exec("INSERT INTO logs (message, date_creation) values ($1, CURRENT_TIMESTAMP)", msg)
-		if err != nil {
-			b.Fatal(err)
+		for j := 0; j < COUNT_INSERTS; j++ {
+			tx, _ := db.Begin()
+			_, err := tx.Exec("INSERT INTO logs (message, date_creation) values ($1, CURRENT_TIMESTAMP)", msg)
+			if err != nil {
+				b.Fatal(err)
+			}
+			tx.Commit()
 		}
-		tx.Commit()
 	}
 
 	db.Close()
@@ -45,6 +50,7 @@ func BenchmarkEveryRowTransaction(b *testing.B) {
 }
 
 func BenchmarkOneTransaction(b *testing.B) {
+	os.Remove("test2.db")
 	db, err := sql.Open("sqlite3", "test2.db")
 	if err != nil {
 		b.Fatal(err)
@@ -66,9 +72,11 @@ func BenchmarkOneTransaction(b *testing.B) {
 	tx, _ := db.Begin()
 
 	for i := 0; i < b.N; i++ {
-		_, err := db.Exec("INSERT INTO logs (message, date_creation) values ($1, CURRENT_TIMESTAMP)", msg)
-		if err != nil {
-			b.Fatal(err)
+		for j := 0; j < COUNT_INSERTS; j++ {
+			_, err := tx.Exec("INSERT INTO logs (message, date_creation) values ($1, CURRENT_TIMESTAMP)", msg)
+			if err != nil {
+				b.Fatal(err)
+			}
 		}
 	}
 
