@@ -3,7 +3,7 @@ package settings
 const PROTOCOL_UDP = "udp"
 const PROTOCOL_TCP = "tcp"
 
-// Entity Input
+// Type Entity Input
 type Input struct {
 	Id       int64
 	Protocol string
@@ -11,17 +11,20 @@ type Input struct {
 	Enabled  int8
 }
 
-// Repository Inputs
-type Inputs struct{}
+// Type Repository inputRepository
+type inputRepository struct{}
 
-// Repository Inputs: Add new input
-func (inputs Inputs) Add(input *Input) error {
+// Repository instance
+var Inputs inputRepository
+
+// Repository inputRepository: Add new input
+func (inputs inputRepository) Add(input *Input) error {
 	db, dbErr := getDb()
 	if dbErr != nil {
 		return dbErr
 	}
 
-	result, err := db.Exec("INSERT INTO inputs (protocol, addr, enabled, date_edit) values ($1, $2, $3, CURRENT_TIMESTAMP)",
+	result, err := db.Exec("INSERT INTO inputRepository (protocol, addr, enabled, date_edit) values ($1, $2, $3, CURRENT_TIMESTAMP)",
 		input.Protocol, input.Addr, input.Enabled)
 
 	if err != nil {
@@ -35,24 +38,27 @@ func (inputs Inputs) Add(input *Input) error {
 	return nil
 }
 
-func (inputs Inputs) GetOne(id int64) (Input, error) {
+func (inputs inputRepository) GetOne(id int64) (Input, error) {
+	var input Input
+
 	db, dbErr := getDb()
+
 	if dbErr != nil {
-		return Input{}, dbErr
+		return input, dbErr
 	}
 
-	row := db.QueryRow("SELECT id, protocol, addr, enabled FROM inputs WHERE id = $1", id)
-	input := Input{}
+	row := db.QueryRow("SELECT id, protocol, addr, enabled FROM inputRepository WHERE id = $1", id)
 
 	err := row.Scan(&input.Id, &input.Protocol, &input.Addr, &input.Enabled)
 
 	if err != nil {
 		return input, err
 	}
+
 	return input, nil
 }
 
-func (inputs Inputs) GetAll() ([]Input, error) {
+func (inputs inputRepository) GetAll() ([]Input, error) {
 
 	items := []Input{}
 
@@ -61,7 +67,7 @@ func (inputs Inputs) GetAll() ([]Input, error) {
 		return items, dbErr
 	}
 
-	rows, err := db.Query("SELECT id, protocol, addr, enabled FROM inputs")
+	rows, err := db.Query("SELECT id, protocol, addr, enabled FROM inputRepository")
 	if err != nil {
 		return items, err
 	}
@@ -78,35 +84,35 @@ func (inputs Inputs) GetAll() ([]Input, error) {
 	return items, nil
 }
 
-func (inputs Inputs) Update(input *Input) error {
+func (inputs inputRepository) Update(input *Input) error {
 	db, dbErr := getDb()
 	if dbErr != nil {
 		return dbErr
 	}
-	_, err := db.Exec("UPDATE inputs SET protocol = $1, addr = $2, enabled = $3, date_edit = CURRENT_TIMESTAMP WHERE id = $4", input.Protocol, input.Addr, input.Enabled, input.Id)
+	_, err := db.Exec("UPDATE inputRepository SET protocol = $1, addr = $2, enabled = $3, date_edit = CURRENT_TIMESTAMP WHERE id = $4", input.Protocol, input.Addr, input.Enabled, input.Id)
 	return err
 }
 
-func (inputs Inputs) Delete(id int64) error {
+func (inputs inputRepository) Delete(id int64) error {
 	db, dbErr := getDb()
 	if dbErr != nil {
 		return dbErr
 	}
-	_, err := db.Exec("DELETE FROM inputs WHERE id = $1", id)
+	_, err := db.Exec("DELETE FROM inputRepository WHERE id = $1", id)
 	return err
 }
 
-func (inputs Inputs) Install() error {
+func (inputs inputRepository) Install() error {
 	db, dbErr := getDb()
 	if dbErr != nil {
 		return dbErr
 	}
 
-	sql := `DROP TABLE inputs`
+	sql := `DROP TABLE inputRepository`
 
 	db.Exec(sql)
 
-	sql = `CREATE TABLE inputs(
+	sql = `CREATE TABLE inputRepository(
 	  id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
 	  protocol TEXT,
 	  addr TEXT,
