@@ -1,7 +1,9 @@
 {{ template "header.html" .}}
 
 
-<h1>Inputs</h1>
+<h1 class="float-left">Inputs</h1>
+
+<a class="btn btn-success float-right" href="/input/add">Add</a>
 
 <table class="table">
     <thead>
@@ -17,40 +19,14 @@
     {{with .inputs }}
     {{range . }}
     <tr>
-        <td>{{ .GetId }}</td>
-        <td>{{ .GetProtocol }}</td>
-        <td>{{ .GetAddr }}</td>
+        <td>{{ .Id }}</td>
+        <td>{{ .Protocol }}</td>
+        <td>{{ .Addr }}</td>
         <td>
-            {{ if .IsActive }}
-                <span class="badge badge-pill badge-success">Active</span>
-            {{ else }}
-                <span class="badge badge-pill badge-secondary">Inactive</span>
-            {{end}}
-            {{ if not .IsEnabled }}
-                <span class="badge badge-pill badge-secondary">Disabled</span>
-            {{end}}
-            {{ if .HasError }}
-                <span class="badge badge-pill badge-danger">Error</span>
-                <div>
-                    {{ .Error }}
-                </div>
-            {{end}}
+
         </td>
         <td class="row">
-            <div class="col-2">
-                <a href="/search" type="button" class="btn btn-primary">Show</a>
-            </div>
-            <div class="col-2">
-                {{ if .IsActive }}
-                    <form action="/input/stop/{{ .GetId }}" method="post">
-                        <input type="submit" class="btn btn-danger" value="Stop">
-                    </form>
-                {{ else }}
-                    <form action="/input/start/{{ .GetId }}" method="post">
-                        <input type="submit" class="btn btn-success" value="Start">
-                    </form>
-                {{ end}}
-            </div>
+
         </td>
     </tr>
     {{end}}

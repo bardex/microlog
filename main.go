@@ -1,13 +1,12 @@
 package main
 
 import (
-	"microlog/input"
 	"microlog/web"
 	"sync"
+	"microlog/settings"
 )
 
 func main() {
-
 	wg := &sync.WaitGroup{}
 
 	// start web server
@@ -15,7 +14,10 @@ func main() {
 	go web.Start()
 
 	// start inputs
-	input.StartAll()
+	repo := settings.Inputs{}
+	inputs, _ := repo.GetAll()
+
+
 
 	// wait all goroutines
 	wg.Wait()

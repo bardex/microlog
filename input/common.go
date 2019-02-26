@@ -1,7 +1,5 @@
 package input
 
-import "time"
-
 const SIGNAL_STOP = 1
 
 type AbstractInput interface {
@@ -25,34 +23,7 @@ type dbRecord struct {
 
 var allInputs []AbstractInput
 
-func StartAll() {
-	// якобы из БД
-	records := []dbRecord{
-		{
-			id:       1,
-			protocol: "udp",
-			addr:     ":8081",
-			enabled:  1,
-		},
-	}
 
-	for _, row := range records {
-		var input AbstractInput
-		switch row.protocol {
-		case "udp":
-			input = CreateUdp(row.id, row.addr, true)
-		}
-
-		if input.IsEnabled() {
-			go input.Start()
-		}
-
-		time.Sleep(2 * time.Second)
-		//input.Shutdown();
-
-		allInputs = append(allInputs, input)
-	}
-}
 
 func GetAllInputs() []AbstractInput {
 	return allInputs

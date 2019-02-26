@@ -1,0 +1,23 @@
+{{ template "header.html" .}}
+
+
+<h1>Add input</h1>
+
+<form action="/input/add" method="post">
+    <div class="form-row align-items-center">
+        <div class="col-sm-1 my-1">
+            <select class="form-control" name="protocol">
+                <option value="udp">UDP</option>
+            </select>
+        </div>
+        <div class="col-sm-2 my-1">
+            <input name="address" type="text" class="form-control" placeholder="Address (like :8081)">
+        </div>
+        <div class="col-auto my-1">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+</form>
+
+
+{{ template "footer.html" .}}

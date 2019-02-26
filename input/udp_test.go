@@ -11,7 +11,7 @@ import (
 )
 
 func TestUdp(t *testing.T) {
-	udp := CreateUdp(1, ":8080", true)
+	udp := CreateUdp(":8080")
 	go udp.Start()
 
 	time.Sleep(1 * time.Second)
@@ -19,10 +19,9 @@ func TestUdp(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		udpSend(strconv.Itoa(i) + "\n")
 		if i >= 50 {
-			udp.Shutdown()
+			udp.Stop()
 		}
 	}
-
 }
 
 func udpSend(msg string) error {
