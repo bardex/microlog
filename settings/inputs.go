@@ -1,5 +1,7 @@
 package settings
 
+import "microlog/listeners"
+
 const PROTOCOL_UDP = "udp"
 const PROTOCOL_TCP = "tcp"
 
@@ -9,12 +11,23 @@ type Input struct {
 	Protocol string
 	Addr     string
 	Enabled  int8
+	listener listeners.Listener
+}
+
+func (input *Input) GetListener() listeners.Listener {
+	if (input.listener == nil) {
+		switch input.Protocol {
+		case PROTOCOL_UDP:
+			input.listener = listeners.CreateUdp(input.Addr)
+		}
+	}
+	return input.listener
 }
 
 // Repository Inputs
 type Inputs struct{}
 
-// Repository Inputs: Add new input
+// Repository Inputs: Add new listeners
 func (inputs Inputs) Add(input *Input) error {
 	db, dbErr := getDb()
 	if dbErr != nil {

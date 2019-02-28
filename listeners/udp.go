@@ -1,4 +1,4 @@
-package input
+package listeners
 
 import (
 	"bytes"
@@ -12,10 +12,10 @@ type udp struct {
 	Addr   string
 	Error  string
 	Active bool
-	Conn   *net.UDPConn
+	conn   *net.UDPConn
 }
 
-func CreateUdp(addr string) *udp {
+func CreateUdp(addr string) Listener {
 	return &udp{
 		Addr:   addr,
 		Active: false,
@@ -37,10 +37,9 @@ func (udp *udp) Start() {
 		udp.Error = err.Error()
 	}
 
-	udp.Conn = ServerConn
+	udp.conn = ServerConn
 	udp.Active = true
 	udp.Error = ""
-
 	defer udp.Stop()
 
 	buf := make([]byte, 1024)
@@ -65,7 +64,7 @@ func (udp *udp) Start() {
 
 func (udp *udp) Stop() {
 	if udp.Active {
-		udp.Conn.Close()
+		udp.conn.Close()
 	}
 	udp.Active = false
 }
