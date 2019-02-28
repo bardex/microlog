@@ -15,7 +15,7 @@ type Input struct {
 }
 
 func (input *Input) GetListener() listeners.Listener {
-	if (input.listener == nil) {
+	if input.listener == nil {
 		switch input.Protocol {
 		case PROTOCOL_UDP:
 			input.listener = listeners.CreateUdp(input.Addr)
@@ -24,11 +24,20 @@ func (input *Input) GetListener() listeners.Listener {
 	return input.listener
 }
 
-// Repository Inputs
-type Inputs struct{}
+// Repository inputRepository
+type inputRepository struct {
+	memory map[int64]*Input
+}
 
-// Repository Inputs: Add new listeners
-func (inputs Inputs) Add(input *Input) error {
+// Repository instance
+var Inputs inputRepository
+
+func init() {
+	Inputs.memory = make(map[int64]*Input)
+}
+
+// Repository inputRepository: Add new listeners
+func (inputs inputRepository) Add(input *Input) error {
 	db, dbErr := getDb()
 	if dbErr != nil {
 		return dbErr
@@ -45,53 +54,76 @@ func (inputs Inputs) Add(input *Input) error {
 
 	input.Id = id
 
+	inputs.memory[input.Id] = input
+
 	return nil
 }
 
-func (inputs Inputs) GetOne(id int64) (Input, error) {
+func (inputs inputRepository) GetOne(id int64) (*Input, error) {
+	// in memory first
+	if val, ok := inputs.memory[id]; ok {
+		return val, nil
+	}
+
 	db, dbErr := getDb()
 	if dbErr != nil {
-		return Input{}, dbErr
+		return nil, dbErr
 	}
 
 	row := db.QueryRow("SELECT id, protocol, addr, enabled FROM inputs WHERE id = $1", id)
-	input := Input{}
+	input := &Input{}
 
 	err := row.Scan(&input.Id, &input.Protocol, &input.Addr, &input.Enabled)
 
 	if err != nil {
-		return input, err
+		return nil, err
 	}
+
+	// save in memory
+	inputs.memory[input.Id] = input
+
 	return input, nil
 }
 
-func (inputs Inputs) GetAll() ([]Input, error) {
+func (inputs inputRepository) GetAll() ([]*Input, error) {
 
-	items := []Input{}
+	// in memory first
+	if len(inputs.memory) > 0 {
+		items := make([]*Input, 0, len(inputs.memory))
+		for _, item := range inputs.memory {
+			items = append(items, item)
+		}
+		return items, nil
+	}
 
 	db, dbErr := getDb()
 	if dbErr != nil {
-		return items, dbErr
+		return nil, dbErr
 	}
 
 	rows, err := db.Query("SELECT id, protocol, addr, enabled FROM inputs")
 	if err != nil {
-		return items, err
+		return nil, err
 	}
+
 	defer rows.Close()
 
+	items := make([]*Input, 0)
+
 	for rows.Next() {
-		input := Input{}
+		input := &Input{}
 		err := rows.Scan(&input.Id, &input.Protocol, &input.Addr, &input.Enabled)
 		if err != nil {
-			return items, err
+			return nil, err
 		}
 		items = append(items, input)
+
+		inputs.memory[input.Id] = input
 	}
 	return items, nil
 }
 
-func (inputs Inputs) Update(input *Input) error {
+func (inputs inputRepository) Update(input *Input) error {
 	db, dbErr := getDb()
 	if dbErr != nil {
 		return dbErr
@@ -100,16 +132,21 @@ func (inputs Inputs) Update(input *Input) error {
 	return err
 }
 
-func (inputs Inputs) Delete(id int64) error {
+func (inputs inputRepository) Delete(id int64) error {
 	db, dbErr := getDb()
 	if dbErr != nil {
 		return dbErr
 	}
 	_, err := db.Exec("DELETE FROM inputs WHERE id = $1", id)
+
+	delete(inputs.memory, id)
+
 	return err
 }
 
-func (inputs Inputs) Install() error {
+func (inputs inputRepository) Install() error {
+	inputs.memory = make(map[int64]*Input)
+
 	db, dbErr := getDb()
 	if dbErr != nil {
 		return dbErr

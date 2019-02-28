@@ -23,10 +23,31 @@
         <td>{{ .Protocol }}</td>
         <td>{{ .Addr }}</td>
         <td>
-
+            {{if .GetListener.Active }}
+                <span class="badge badge-pill badge-success">Active</span>
+            {{else}}
+                <span class="badge badge-pill badge-secondary">Inactive</span>
+            {{end}}
         </td>
         <td class="row">
-
+            {{ if .GetListener.Active }}
+                <div class="col-2">
+                    <form action="/input/stop/{{ .Id }}" method="post">
+                        <input type="submit" class="btn btn-danger btn-sm" value="Stop">
+                    </form>
+                </div>
+            {{ else }}
+                <div class="col-2">
+                    <form action="/input/start/{{ .Id }}" method="post">
+                        <input type="submit" class="btn btn-success btn-sm" value="Start">
+                    </form>
+                </div>
+                <div class="col-2">
+                    <form action="/input/delete/{{ .Id }}" method="post">
+                        <input type="submit" class="btn btn-danger btn-sm" value="Delete">
+                    </form>
+                </div>
+            {{ end}}
         </td>
     </tr>
     {{end}}

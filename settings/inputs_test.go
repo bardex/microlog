@@ -11,7 +11,7 @@ func TestAdd(t *testing.T) {
 		Enabled:  1,
 	}
 
-	repo := Inputs{}
+	repo := Inputs
 	repo.Install()
 
 	err := repo.Add(&item)
@@ -23,17 +23,16 @@ func TestAdd(t *testing.T) {
 }
 
 func TestGetOne(t *testing.T) {
-	item := Input{
+	item := &Input{
 		Protocol: PROTOCOL_TCP,
 		Addr:     ":8081",
 		Enabled:  1,
 	}
 
-	repo := Inputs{}
-	repo.Install()
-	repo.Add(&item)
+	Inputs.Install()
+	Inputs.Add(item)
 
-	newItem, err := repo.GetOne(1)
+	newItem, err := Inputs.GetOne(1)
 	t.Log(newItem)
 	if err != nil {
 		t.Fatalf("%s", err)
@@ -59,12 +58,11 @@ func TestGetAll(t *testing.T) {
 		Enabled:  0,
 	}
 
-	repo := Inputs{}
-	repo.Install()
-	repo.Add(&item1)
-	repo.Add(&item2)
+	Inputs.Install()
+	Inputs.Add(&item1)
+	Inputs.Add(&item2)
 
-	items, err := repo.GetAll()
+	items, err := Inputs.GetAll()
 	t.Log(items)
 	if err != nil {
 		t.Fatalf("%s", err)
@@ -78,23 +76,22 @@ func TestGetAll(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	item := Input{
+	item := &Input{
 		Protocol: PROTOCOL_UDP,
 		Addr:     ":8080",
 		Enabled:  1,
 	}
 
-	repo := Inputs{}
-	repo.Install()
-	repo.Add(&item)
+	Inputs.Install()
+	Inputs.Add(item)
 
 	item.Protocol = PROTOCOL_TCP
 	item.Addr = ":8081"
 	item.Enabled = 0
 
-	repo.Update(&item)
+	Inputs.Update(item)
 
-	newItem, err := repo.GetOne(item.Id)
+	newItem, err := Inputs.GetOne(item.Id)
 	t.Log(newItem)
 	if err != nil {
 		t.Fatalf("%s", err)
@@ -109,21 +106,20 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	item := Input{
+	item := &Input{
 		Protocol: PROTOCOL_UDP,
 		Addr:     ":8080",
 		Enabled:  1,
 	}
 
-	repo := Inputs{}
-	repo.Install()
-	repo.Add(&item)
+	Inputs.Install()
+	Inputs.Add(item)
 
-	err := repo.Delete(item.Id)
+	err := Inputs.Delete(item.Id)
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
-	delItem, _ := repo.GetOne(item.Id)
+	delItem, _ := Inputs.GetOne(item.Id)
 	if delItem == item {
 		t.Fatal("Equal source item and delete item", item, delItem)
 	}

@@ -9,6 +9,7 @@ func initRoutes() {
 	router.POST("/input/add", actions.CreateInput)
 	router.POST("/input/stop/:id", actions.StopInput)
 	router.POST("/input/start/:id", actions.StartInput)
+	router.POST("/input/delete/:id", actions.DeleteInput)
 	router.GET("/search", actions.Search)
 
 	// static files

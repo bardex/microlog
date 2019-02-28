@@ -2,7 +2,6 @@ package actions
 
 import (
 	"github.com/gin-gonic/gin"
-	"microlog/input"
 	"microlog/settings"
 	"net/http"
 	"strconv"
@@ -10,8 +9,8 @@ import (
 
 // All inputs
 func Inputs(c *gin.Context) {
-	repo := settings.Inputs{}
-	inputs, _ := repo.GetAll()
+	inputs, _ := settings.Inputs.GetAll()
+
 	c.HTML(
 		http.StatusOK,
 		"inputs.html",
@@ -24,17 +23,34 @@ func Inputs(c *gin.Context) {
 
 // Stop input
 func StopInput(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	input := input.GetById(id)
-	input.Shutdown()
+	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	input, err := settings.Inputs.GetOne(id)
+
+	if err == nil {
+		input.GetListener().Stop()
+	}
+
 	c.Redirect(http.StatusFound, "/inputs")
 }
 
 // Start input
 func StartInput(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	input := input.GetById(id)
-	input.Start()
+	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	input, err := settings.Inputs.GetOne(id)
+
+	if err == nil {
+		go input.GetListener().Start()
+	}
+
+	c.Redirect(http.StatusFound, "/inputs")
+}
+
+// Delete input
+func DeleteInput(c *gin.Context) {
+	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+
+	settings.Inputs.Delete(id)
+
 	c.Redirect(http.StatusFound, "/inputs")
 }
 
@@ -60,7 +76,7 @@ func CreateInput(c *gin.Context) {
 		Addr:     addr,
 	}
 
-	repo := settings.Inputs{}
+	repo := settings.Inputs
 
 	repo.Add(&newInput)
 
