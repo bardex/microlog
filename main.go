@@ -21,7 +21,9 @@ func main() {
 	inputs, _ := repo.GetAll()
 
 	for _, input := range inputs {
-		go input.GetListener().Start()
+		if input.Enabled == 1 {
+			input.GetListener().Start()
+		}
 	}
 
 	// wait all goroutines

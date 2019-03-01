@@ -28,6 +28,8 @@ func StopInput(c *gin.Context) {
 
 	if err == nil {
 		input.GetListener().Stop()
+		input.Enabled = 0
+		settings.Inputs.Update(input)
 	}
 
 	c.Redirect(http.StatusFound, "/inputs")
@@ -39,7 +41,9 @@ func StartInput(c *gin.Context) {
 	input, err := settings.Inputs.GetOne(id)
 
 	if err == nil {
-		go input.GetListener().Start()
+		input.GetListener().Start()
+		input.Enabled = 1
+		settings.Inputs.Update(input)
 	}
 
 	c.Redirect(http.StatusFound, "/inputs")
@@ -68,12 +72,14 @@ func AddInput(c *gin.Context) {
 // Create new input
 func CreateInput(c *gin.Context) {
 
-	protocol := c.PostForm("protocol")
+	protocol  := c.PostForm("protocol")
+	extractor := c.PostForm("extractor")
 	addr := c.PostForm("address")
 
 	newInput := settings.Input{
-		Protocol: protocol,
-		Addr:     addr,
+		Protocol:  protocol,
+		Extractor: extractor,
+		Addr:      addr,
 	}
 
 	repo := settings.Inputs

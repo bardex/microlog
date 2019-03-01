@@ -1,11 +1,7 @@
 package listeners
 
 import (
-	"bytes"
-	"compress/zlib"
-	"io"
 	"net"
-	"os"
 )
 
 type udp struct {
@@ -13,53 +9,51 @@ type udp struct {
 	Error  string
 	Active bool
 	conn   *net.UDPConn
+	extractor Extractor
 }
 
-func CreateUdp(addr string) Listener {
+func CreateUdp(addr string, extractor string) Listener {
 	return &udp{
 		Addr:   addr,
 		Active: false,
+		extractor: createExtractor(extractor),
 	}
 }
 
 // start listen
 func (udp *udp) Start() {
-	ServerAddr, err := net.ResolveUDPAddr("udp", udp.Addr)
-
-	if err != nil {
-		udp.Error = err.Error()
-		return
-	}
-
-	ServerConn, err := net.ListenUDP("udp", ServerAddr)
-
-	if err != nil {
-		udp.Error = err.Error()
-	}
-
-	udp.conn = ServerConn
-	udp.Active = true
-	udp.Error = ""
-	defer udp.Stop()
-
-	buf := make([]byte, 1024)
-
-	for {
-		_, _, err := ServerConn.ReadFromUDP(buf)
+	go (func() {
+		ServerAddr, err := net.ResolveUDPAddr("udp", udp.Addr)
 
 		if err != nil {
 			udp.Error = err.Error()
-			break
+			return
 		}
 
-		b := bytes.NewReader(buf)
-		r, err := zlib.NewReader(b)
+		ServerConn, err := net.ListenUDP("udp", ServerAddr)
 
-		if err == nil {
-			io.Copy(os.Stdout, r)
-			r.Close()
+		if err != nil {
+			udp.Error = err.Error()
 		}
-	}
+
+		udp.conn = ServerConn
+		udp.Active = true
+		udp.Error = ""
+		defer udp.Stop()
+
+		buf := make([]byte, 64*1024*1024)
+
+		for {
+			_, _, err := ServerConn.ReadFromUDP(buf)
+
+			if err != nil {
+				udp.Error = err.Error()
+				break
+			}
+
+			udp.extractor.Extract(buf)
+		}
+	})()
 }
 
 func (udp *udp) Stop() {

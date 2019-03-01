@@ -9,9 +9,10 @@
     <thead>
     <tr>
         <th scope="col">#</th>
-        <th scope="col">Protocol</th>
+        <th scope="col">Protocol / Extractor</th>
         <th scope="col">Address</th>
         <th scope="col">Status</th>
+        <th scope="col">Errors</th>
         <th scope="col">Operations</th>
     </tr>
     </thead>
@@ -20,13 +21,20 @@
     {{range . }}
     <tr>
         <td>{{ .Id }}</td>
-        <td>{{ .Protocol }}</td>
+        <td>{{ .Protocol }} / {{ .Extractor }}</td>
         <td>{{ .Addr }}</td>
         <td>
             {{if .GetListener.Active }}
                 <span class="badge badge-pill badge-success">Active</span>
             {{else}}
                 <span class="badge badge-pill badge-secondary">Inactive</span>
+            {{end}}
+        </td>
+        <td>
+            {{if .GetListener.Error }}
+                <div class="alert alert-danger" role="alert">
+                    {{ .GetListener.Error }}
+                </div>
             {{end}}
         </td>
         <td class="row">
@@ -52,7 +60,7 @@
     </tr>
     {{end}}
     {{end}}
-    <tr><td colspan="5"></td></tr>
+
     </tbody>
 </table>
 

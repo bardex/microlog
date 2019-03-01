@@ -7,18 +7,19 @@ const PROTOCOL_TCP = "tcp"
 
 // Entity Input
 type Input struct {
-	Id       int64
-	Protocol string
-	Addr     string
-	Enabled  int8
-	listener listeners.Listener
+	Id        int64
+	Protocol  string
+	Extractor string
+	Addr      string
+	Enabled   int8
+	listener  listeners.Listener
 }
 
 func (input *Input) GetListener() listeners.Listener {
 	if input.listener == nil {
 		switch input.Protocol {
 		case PROTOCOL_UDP:
-			input.listener = listeners.CreateUdp(input.Addr)
+			input.listener = listeners.CreateUdp(input.Addr, input.Extractor)
 		}
 	}
 	return input.listener
@@ -43,8 +44,8 @@ func (inputs inputRepository) Add(input *Input) error {
 		return dbErr
 	}
 
-	result, err := db.Exec("INSERT INTO inputs (protocol, addr, enabled, date_edit) values ($1, $2, $3, CURRENT_TIMESTAMP)",
-		input.Protocol, input.Addr, input.Enabled)
+	result, err := db.Exec("INSERT INTO inputs (protocol, extractor, addr, enabled, date_edit) values ($1, $2, $3, $4, CURRENT_TIMESTAMP)",
+		input.Protocol, input.Extractor, input.Addr, input.Enabled)
 
 	if err != nil {
 		return err
@@ -70,10 +71,10 @@ func (inputs inputRepository) GetOne(id int64) (*Input, error) {
 		return nil, dbErr
 	}
 
-	row := db.QueryRow("SELECT id, protocol, addr, enabled FROM inputs WHERE id = $1", id)
+	row := db.QueryRow("SELECT id, protocol, extractor, addr, enabled FROM inputs WHERE id = $1", id)
 	input := &Input{}
 
-	err := row.Scan(&input.Id, &input.Protocol, &input.Addr, &input.Enabled)
+	err := row.Scan(&input.Id, &input.Protocol, &input.Extractor, &input.Addr, &input.Enabled)
 
 	if err != nil {
 		return nil, err
@@ -101,7 +102,7 @@ func (inputs inputRepository) GetAll() ([]*Input, error) {
 		return nil, dbErr
 	}
 
-	rows, err := db.Query("SELECT id, protocol, addr, enabled FROM inputs")
+	rows, err := db.Query("SELECT id, protocol, extractor, addr, enabled FROM inputs ORDER BY id")
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +113,7 @@ func (inputs inputRepository) GetAll() ([]*Input, error) {
 
 	for rows.Next() {
 		input := &Input{}
-		err := rows.Scan(&input.Id, &input.Protocol, &input.Addr, &input.Enabled)
+		err := rows.Scan(&input.Id, &input.Protocol, &input.Extractor, &input.Addr, &input.Enabled)
 		if err != nil {
 			return nil, err
 		}
@@ -128,7 +129,12 @@ func (inputs inputRepository) Update(input *Input) error {
 	if dbErr != nil {
 		return dbErr
 	}
-	_, err := db.Exec("UPDATE inputs SET protocol = $1, addr = $2, enabled = $3, date_edit = CURRENT_TIMESTAMP WHERE id = $4", input.Protocol, input.Addr, input.Enabled, input.Id)
+	_, err := db.Exec("UPDATE inputs SET protocol = $1, extractor = $2, addr = $3, enabled = $4, date_edit = CURRENT_TIMESTAMP WHERE id = $5",
+		input.Protocol,
+		input.Extractor,
+		input.Addr,
+		input.Enabled,
+		input.Id)
 	return err
 }
 
@@ -159,6 +165,7 @@ func (inputs inputRepository) Install() error {
 	sql = `CREATE TABLE inputs(
 	  id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
 	  protocol TEXT,
+	  extractor TEXT,
 	  addr TEXT,
 	  enabled INTEGER,
 	  date_edit DATETIME
