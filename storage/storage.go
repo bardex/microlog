@@ -7,6 +7,8 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
+	"regexp"
 )
 
 // Entity Field
@@ -119,7 +121,7 @@ func add(tx *sql.Tx, fields map[string]string) error {
 	return nil
 }
 
-func find(tsStart int32, tsEnd int32, searchFields []Field) ([]Message, error) {
+func find(tsStart int32, tsEnd int32, page int32, limit int32, searchFields []Field, selectFields []string) ([]Message, error) {
 	messages := []Message{}
 
 	dbErr := openDb()
@@ -129,13 +131,16 @@ func find(tsStart int32, tsEnd int32, searchFields []Field) ([]Message, error) {
 
 	var wheres []string
 	var joins []string
-	// TODO clean key and value
+
 	var counterFields int
 	for _, field := range searchFields {
+		key := cleanStr(field.Key)
+		value := cleanStr(field.Value)
+
 		counterFields++
 		c := fmt.Sprintf("%d", counterFields)
 
-		valueType := getValueType(field.Value)
+		valueType := getValueType(value)
 		fieldType := getFieldTypeByValueType(valueType)
 
 		if counterFields > 1 {
@@ -143,9 +148,9 @@ func find(tsStart int32, tsEnd int32, searchFields []Field) ([]Message, error) {
 		}
 
 		if valueType == "string" {
-			wheres = append(wheres, "(m"+c+".k = \""+field.Key+"\" AND m"+c+"."+fieldType+" LIKE \""+field.Value+"\")")
+			wheres = append(wheres, "(m"+c+".k = \""+key+"\" AND m"+c+"."+fieldType+" LIKE \""+value+"\")")
 		} else if valueType == "integer" || valueType == "float" {
-			wheres = append(wheres, "(m"+c+".k = \""+field.Key+"\" AND m"+c+"."+fieldType+" = \""+field.Value+"\")")
+			wheres = append(wheres, "(m"+c+".k = \""+key+"\" AND m"+c+"."+fieldType+" = \""+value+"\")")
 		}
 	}
 
@@ -166,11 +171,21 @@ func find(tsStart int32, tsEnd int32, searchFields []Field) ([]Message, error) {
 		sqlWhere = " WHERE " + strings.Join(wheres, " AND ")
 	}
 
+	var sqlWhere2 string
+	if len(selectFields) > 0 {
+		sqlWhere2 = " AND mf.k IN ('"+strings.Join(selectFields, "', '")+"')"
+	}
+
+	if page < 1 {
+		page = 1
+	}
+	skip := limit * (page - 1)
+
 	sql := "SELECT mf.k, COALESCE (mf.string, mf.integer, mf.float) AS value, mf.timestamp, mf.message_id  " +
 		"FROM message_fields mf WHERE mf.message_id IN (" +
 		"SELECT m1.message_id FROM message_fields m1 " + sqlJoin + sqlWhere + " " +
-		"GROUP BY m1.message_id ORDER BY m1.message_id DESC LIMIT 100" +
-		") ORDER BY mf.message_id DESC"
+		"GROUP BY m1.message_id ORDER BY m1.message_id DESC LIMIT " + fmt.Sprintf("%d", skip) + ", " + fmt.Sprintf("%d", limit) +
+		")"+sqlWhere2+" ORDER BY mf.message_id DESC"
 	//log.Fatal(sql) // TODO debug
 	rows, err := db.Query(sql)
 
@@ -212,6 +227,21 @@ func find(tsStart int32, tsEnd int32, searchFields []Field) ([]Message, error) {
 	}
 
 	return messages, nil
+}
+
+func cleanStr(str string) string {
+	var re = regexp.MustCompile(`[^A-z% 0-9.<=>_-]*`)
+	return re.ReplaceAllString(str, "")
+}
+
+func removeOld(ageSec int64) error {
+	dbErr := openDb()
+	if dbErr != nil {
+		return dbErr
+	}
+	maxTimestamp := time.Now().Unix() - ageSec
+	_, err := db.Exec("DELETE FROM message_fields WHERE timestamp <= datetime($1, 'unixepoch')", fmt.Sprintf("%d", maxTimestamp))
+	return err
 }
 
 func getValueType(value string) string {

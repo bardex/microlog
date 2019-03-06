@@ -23,9 +23,49 @@ func TestFind(t *testing.T) {
 		Value: "value1-211%",
 	})
 
-	messages, err := find(0, 2000000000, fields)
-	t.Log(err)
+	messages, err := find(0, 2000000000, 1, 100, fields, []string{})
+	if err != nil {
+		log.Fatal(err)
+	}
 	t.Log(messages)
+	if len(messages) == 0 {
+		t.Fatal("Count items = 0")
+	}
+
+	messages, err = find(0, 2000000000, 1, 2, fields, []string{"key1", "key2"})
+	if err != nil {
+		log.Fatal(err)
+	}
+	t.Log(messages)
+	if len(messages) != 2 {
+		t.Fatal("Count items != 2")
+	}
+}
+
+func TestRemoveOld(t *testing.T) {
+	initDb(false)
+	defer closeDb()
+	fillDb(1000)
+
+	errRemove := removeOld(0)
+	if errRemove != nil {
+		log.Fatal(errRemove)
+	}
+
+	messages, err := find(0, 2000000000, 1, 10, []Field{}, []string{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(messages) > 0 {
+		t.Fatal("Count items > 0")
+	}
+}
+
+func TestCleanStr(t *testing.T)  {
+	str := "123 abc def-.%<=>'\""
+	if cleanStr(str) != "123 abc def-.%<=>" {
+		t.Fatal("Not cleaned string")
+	}
 }
 
 func fillDb(countRows int64) {
