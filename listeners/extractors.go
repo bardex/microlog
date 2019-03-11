@@ -3,19 +3,22 @@ package listeners
 import (
 	"bytes"
 	"compress/zlib"
-	"io"
-	"fmt"
 	"encoding/json"
+	"io"
 )
 
 const EXTRACTOR_ZLIB_JSON = "ZLIB_JSON"
 const EXTRACTOR_JSON = "JSON"
 const EXTRACTOR_STRING = "STRING"
 
-type Message map[string]string
+var ExtractorsList = map[string]string{
+	EXTRACTOR_ZLIB_JSON: "zlib + JSON (GrayLog)",
+	EXTRACTOR_JSON:      "JSON",
+	EXTRACTOR_STRING:    "String",
+}
 
 type Extractor interface {
-	Extract([]byte) Message
+	Extract([]byte) (map[string]interface{}, error)
 }
 
 func createExtractor(name string) Extractor {
@@ -31,46 +34,42 @@ func createExtractor(name string) Extractor {
 	return e
 }
 
-type ZlibJsonExtractor struct {}
+type ZlibJsonExtractor struct{}
 
-func (e ZlibJsonExtractor) Extract(buf []byte) Message {
+func (e ZlibJsonExtractor) Extract(buf []byte) (map[string]interface{}, error) {
+	msg := make(map[string]interface{})
 	r, err := zlib.NewReader(bytes.NewReader(buf))
-	defer r.Close()
 
-	if err == nil {
-		var data interface{}
-		dec := json.NewDecoder(r)
-		err = dec.Decode(&data)
-		if err != nil && err != io.EOF {
-			panic(err)
-		}
-		fmt.Printf("%#v \n\n", data)
+	if err != nil {
+		return msg, err
 	}
 
-	return Message{}
+	defer r.Close()
+
+	dec := json.NewDecoder(r)
+	err = dec.Decode(&msg)
+	if err != nil && err != io.EOF {
+		return msg, err
+	}
+	return msg, nil
 }
 
 type JsonExtractor struct{}
 
-func (e JsonExtractor) Extract(buf []byte) Message {
-	var data interface{}
+func (e JsonExtractor) Extract(buf []byte) (map[string]interface{}, error) {
+	msg := make(map[string]interface{})
 	dec := json.NewDecoder(bytes.NewReader(buf))
-	err := dec.Decode(&data)
+	err := dec.Decode(&msg)
 	if err != nil && err != io.EOF {
-		panic(err)
+		return msg, err
 	}
-
-	fmt.Printf("%#v \n\n", data)
-
-	return Message{}
+	return msg, nil
 }
 
 type StringExtractor struct{}
 
-func (e StringExtractor) Extract(buf []byte) Message {
-	data := string(buf)
-
-	fmt.Printf("%#v \n\n", data)
-
-	return Message{}
+func (e StringExtractor) Extract(buf []byte) (map[string]interface{}, error) {
+	msg := make(map[string]interface{})
+	msg["msg"] = string(buf)
+	return msg, nil
 }

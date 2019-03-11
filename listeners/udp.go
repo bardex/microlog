@@ -5,17 +5,17 @@ import (
 )
 
 type udp struct {
-	Addr   string
-	Error  string
-	Active bool
-	conn   *net.UDPConn
+	Addr      string
+	Error     string
+	Active    bool
+	conn      *net.UDPConn
 	extractor Extractor
 }
 
 func CreateUdp(addr string, extractor string) Listener {
 	return &udp{
-		Addr:   addr,
-		Active: false,
+		Addr:      addr,
+		Active:    false,
 		extractor: createExtractor(extractor),
 	}
 }

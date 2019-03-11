@@ -1,16 +1,16 @@
 package settings
 
 import (
-	"testing"
 	"microlog/listeners"
+	"testing"
 )
 
 func TestAdd(t *testing.T) {
 	item := Input{
-		Protocol: PROTOCOL_UDP,
+		Protocol:  PROTOCOL_UDP,
 		Extractor: listeners.EXTRACTOR_ZLIB_JSON,
-		Addr:     ":8080",
-		Enabled:  1,
+		Addr:      ":8080",
+		Enabled:   1,
 	}
 
 	repo := Inputs
@@ -26,10 +26,10 @@ func TestAdd(t *testing.T) {
 
 func TestGetOne(t *testing.T) {
 	item := &Input{
-		Protocol: PROTOCOL_TCP,
+		Protocol:  PROTOCOL_TCP,
 		Extractor: listeners.EXTRACTOR_ZLIB_JSON,
-		Addr:     ":8081",
-		Enabled:  1,
+		Addr:      ":8081",
+		Enabled:   1,
 	}
 
 	Inputs.Install()
@@ -50,17 +50,17 @@ func TestGetOne(t *testing.T) {
 
 func TestGetAll(t *testing.T) {
 	item1 := Input{
-		Protocol: PROTOCOL_UDP,
+		Protocol:  PROTOCOL_UDP,
 		Extractor: listeners.EXTRACTOR_ZLIB_JSON,
-		Addr:     ":8080",
-		Enabled:  1,
+		Addr:      ":8080",
+		Enabled:   1,
 	}
 
 	item2 := Input{
-		Protocol: PROTOCOL_TCP,
+		Protocol:  PROTOCOL_TCP,
 		Extractor: listeners.EXTRACTOR_JSON,
-		Addr:     ":8081",
-		Enabled:  0,
+		Addr:      ":8081",
+		Enabled:   0,
 	}
 
 	Inputs.Install()
@@ -82,10 +82,10 @@ func TestGetAll(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	item := &Input{
-		Protocol: PROTOCOL_UDP,
+		Protocol:  PROTOCOL_UDP,
 		Extractor: listeners.EXTRACTOR_JSON,
-		Addr:     ":8080",
-		Enabled:  1,
+		Addr:      ":8080",
+		Enabled:   1,
 	}
 
 	Inputs.Install()

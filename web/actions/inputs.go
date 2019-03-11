@@ -72,7 +72,7 @@ func AddInput(c *gin.Context) {
 // Create new input
 func CreateInput(c *gin.Context) {
 
-	protocol  := c.PostForm("protocol")
+	protocol := c.PostForm("protocol")
 	extractor := c.PostForm("extractor")
 	addr := c.PostForm("address")
 
