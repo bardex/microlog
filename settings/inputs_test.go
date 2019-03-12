@@ -7,7 +7,7 @@ import (
 
 func TestAdd(t *testing.T) {
 	item := Input{
-		Protocol:  PROTOCOL_UDP,
+		Protocol:  listeners.PROTOCOL_UDP,
 		Extractor: listeners.EXTRACTOR_ZLIB_JSON,
 		Addr:      ":8080",
 		Enabled:   1,
@@ -26,7 +26,7 @@ func TestAdd(t *testing.T) {
 
 func TestGetOne(t *testing.T) {
 	item := &Input{
-		Protocol:  PROTOCOL_TCP,
+		Protocol:  listeners.PROTOCOL_TCP,
 		Extractor: listeners.EXTRACTOR_ZLIB_JSON,
 		Addr:      ":8081",
 		Enabled:   1,
@@ -50,14 +50,14 @@ func TestGetOne(t *testing.T) {
 
 func TestGetAll(t *testing.T) {
 	item1 := Input{
-		Protocol:  PROTOCOL_UDP,
+		Protocol:  listeners.PROTOCOL_UDP,
 		Extractor: listeners.EXTRACTOR_ZLIB_JSON,
 		Addr:      ":8080",
 		Enabled:   1,
 	}
 
 	item2 := Input{
-		Protocol:  PROTOCOL_TCP,
+		Protocol:  listeners.PROTOCOL_TCP,
 		Extractor: listeners.EXTRACTOR_JSON,
 		Addr:      ":8081",
 		Enabled:   0,
@@ -82,7 +82,7 @@ func TestGetAll(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	item := &Input{
-		Protocol:  PROTOCOL_UDP,
+		Protocol:  listeners.PROTOCOL_UDP,
 		Extractor: listeners.EXTRACTOR_JSON,
 		Addr:      ":8080",
 		Enabled:   1,
@@ -91,7 +91,7 @@ func TestUpdate(t *testing.T) {
 	Inputs.Install()
 	Inputs.Add(item)
 
-	item.Protocol = PROTOCOL_TCP
+	item.Protocol = listeners.PROTOCOL_TCP
 	item.Addr = ":8081"
 	item.Extractor = listeners.EXTRACTOR_ZLIB_JSON
 	item.Enabled = 0
@@ -114,7 +114,7 @@ func TestUpdate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	item := &Input{
-		Protocol: PROTOCOL_UDP,
+		Protocol: listeners.PROTOCOL_UDP,
 		Addr:     ":8080",
 		Enabled:  1,
 	}

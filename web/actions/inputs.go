@@ -2,6 +2,7 @@ package actions
 
 import (
 	"github.com/gin-gonic/gin"
+	"microlog/listeners"
 	"microlog/settings"
 	"net/http"
 	"strconv"
@@ -27,7 +28,8 @@ func StopInput(c *gin.Context) {
 	input, err := settings.Inputs.GetOne(id)
 
 	if err == nil {
-		input.GetListener().Stop()
+		listener, _ := input.GetListener()
+		listener.Stop()
 		input.Enabled = 0
 		settings.Inputs.Update(input)
 	}
@@ -41,7 +43,8 @@ func StartInput(c *gin.Context) {
 	input, err := settings.Inputs.GetOne(id)
 
 	if err == nil {
-		input.GetListener().Start()
+		listener, _ := input.GetListener()
+		listener.Start()
 		input.Enabled = 1
 		settings.Inputs.Update(input)
 	}
@@ -52,9 +55,7 @@ func StartInput(c *gin.Context) {
 // Delete input
 func DeleteInput(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-
 	settings.Inputs.Delete(id)
-
 	c.Redirect(http.StatusFound, "/inputs")
 }
 
@@ -64,7 +65,8 @@ func AddInput(c *gin.Context) {
 		http.StatusOK,
 		"add_input.html",
 		gin.H{
-			"title": "Add input",
+			"title":      "Add input",
+			"extractors": listeners.Extractors,
 		},
 	)
 }

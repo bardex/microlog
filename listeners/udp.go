@@ -12,12 +12,17 @@ type udp struct {
 	extractor Extractor
 }
 
-func CreateUdp(addr string, extractor string) Listener {
+func CreateUdp(addr string, extractor string) (Listener, error) {
+	ext, err := createExtractor(extractor)
+	if err != nil {
+		return nil, err
+	}
+
 	return &udp{
 		Addr:      addr,
 		Active:    false,
-		extractor: createExtractor(extractor),
-	}
+		extractor: ext,
+	}, nil
 }
 
 // start listen

@@ -11,7 +11,12 @@ import (
 )
 
 func TestUdp(t *testing.T) {
-	udp := CreateUdp(":8080", EXTRACTOR_ZLIB_JSON)
+	udp, err := CreateUdp(":8080", "ZLIB_JSON")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	go udp.Start()
 
 	time.Sleep(1 * time.Second)

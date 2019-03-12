@@ -12,9 +12,11 @@
         </div>
         <div class="col-sm-2 my-1">
             <select class="form-control" name="extractor">
-                <option value="ZLIB_JSON">GrayLog (zlib+json)</option>
-                <option value="JSON">JSON</option>
-                <option value="STRING">String</option>
+                {{with .extractors }}
+                {{range . }}
+                    <option value="{{ .GetName }}">{{ .GetDescription }}</option>
+                {{end}}
+                {{end}}
             </select>
         </div>
         <div class="col-sm-2 my-1">

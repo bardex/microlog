@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/zlib"
 	"encoding/json"
+	"fmt"
 	"io"
 )
 
@@ -11,29 +12,29 @@ const EXTRACTOR_ZLIB_JSON = "ZLIB_JSON"
 const EXTRACTOR_JSON = "JSON"
 const EXTRACTOR_STRING = "STRING"
 
-var ExtractorsList = map[string]string{
-	EXTRACTOR_ZLIB_JSON: "zlib + JSON (GrayLog)",
-	EXTRACTOR_JSON:      "JSON",
-	EXTRACTOR_STRING:    "String",
+var Extractors = []Extractor{
+	ZlibJsonExtractor{},
+	JsonExtractor{},
+	StringExtractor{},
 }
 
 type Extractor interface {
 	Extract([]byte) (map[string]interface{}, error)
+	GetName() string
+	GetDescription() string
 }
 
-func createExtractor(name string) Extractor {
-	var e Extractor
-	switch name {
-	case EXTRACTOR_ZLIB_JSON:
-		e = ZlibJsonExtractor{}
-	case EXTRACTOR_JSON:
-		e = JsonExtractor{}
-	case EXTRACTOR_STRING:
-		e = StringExtractor{}
+func createExtractor(name string) (Extractor, error) {
+	for _, v := range Extractors {
+		if v.GetName() == name {
+			ext := v
+			return ext, nil
+		}
 	}
-	return e
+	return StringExtractor{}, fmt.Errorf("extractor %s not found", name)
 }
 
+// ------  ZLIB_JSON ----------------------------------------
 type ZlibJsonExtractor struct{}
 
 func (e ZlibJsonExtractor) Extract(buf []byte) (map[string]interface{}, error) {
@@ -54,6 +55,15 @@ func (e ZlibJsonExtractor) Extract(buf []byte) (map[string]interface{}, error) {
 	return msg, nil
 }
 
+func (e ZlibJsonExtractor) GetName() string {
+	return EXTRACTOR_ZLIB_JSON
+}
+
+func (e ZlibJsonExtractor) GetDescription() string {
+	return "zlib + JSON (GrayLog)"
+}
+
+// ------ JSON -----------------------------------------------
 type JsonExtractor struct{}
 
 func (e JsonExtractor) Extract(buf []byte) (map[string]interface{}, error) {
@@ -66,10 +76,27 @@ func (e JsonExtractor) Extract(buf []byte) (map[string]interface{}, error) {
 	return msg, nil
 }
 
+func (e JsonExtractor) GetName() string {
+	return EXTRACTOR_JSON
+}
+
+func (e JsonExtractor) GetDescription() string {
+	return "JSON"
+}
+
+// ------ STRING ---------------------------------------------
 type StringExtractor struct{}
 
 func (e StringExtractor) Extract(buf []byte) (map[string]interface{}, error) {
 	msg := make(map[string]interface{})
 	msg["msg"] = string(buf)
 	return msg, nil
+}
+
+func (e StringExtractor) GetName() string {
+	return EXTRACTOR_STRING
+}
+
+func (e StringExtractor) GetDescription() string {
+	return "String"
 }

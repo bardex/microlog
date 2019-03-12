@@ -82,3 +82,37 @@ func TestZlibJsonExtract(t *testing.T) {
 		}
 	}
 }
+
+func TestExtractorFactory(t *testing.T) {
+	jsonExt, err := createExtractor("JSON")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if jsonExt.GetName() != "JSON" {
+		t.Fatal("Not JSON extractor")
+	}
+
+	zlibJsonExt, err := createExtractor("ZLIB_JSON")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if zlibJsonExt.GetName() != "ZLIB_JSON" {
+		t.Fatal("Not ZLIB_JSON extractor")
+	}
+
+	stringExt, err := createExtractor("STRING")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if stringExt.GetName() != "STRING" {
+		t.Fatal("Not STRING extractor")
+	}
+
+	_, notNilError := createExtractor("any")
+	if notNilError == nil {
+		t.Fatal("Expected error")
+	}
+}

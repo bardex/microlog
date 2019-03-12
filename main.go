@@ -16,13 +16,14 @@ func main() {
 	// start inputs
 	repo := settings.Inputs
 
-	//repo.Install()
+	repo.Install()
 
 	inputs, _ := repo.GetAll()
 
 	for _, input := range inputs {
 		if input.Enabled == 1 {
-			input.GetListener().Start()
+			listener, _ := input.GetListener()
+			listener.Start()
 		}
 	}
 
