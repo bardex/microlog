@@ -39,6 +39,7 @@ func (udp *udp) Start() {
 
 		if err != nil {
 			udp.Error = err.Error()
+			return
 		}
 
 		udp.conn = ServerConn
@@ -63,7 +64,10 @@ func (udp *udp) Start() {
 
 func (udp *udp) Stop() {
 	if udp.Active {
-		udp.conn.Close()
+		if udp.conn != nil {
+			_ = udp.conn.Close()
+		}
 	}
 	udp.Active = false
+	udp.conn = nil
 }
