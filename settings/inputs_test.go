@@ -2,10 +2,18 @@ package settings
 
 import (
 	"microlog/listeners"
+	"os"
 	"testing"
 )
 
 func TestAdd(t *testing.T) {
+	dbname := "test_1.db"
+	sqlitePath = dbname
+	os.Remove(dbname)
+	defer os.Remove(dbname)
+
+	Migrate()
+
 	item := Input{
 		Protocol:  listeners.PROTOCOL_UDP,
 		Extractor: listeners.EXTRACTOR_ZLIB_JSON,
@@ -14,7 +22,6 @@ func TestAdd(t *testing.T) {
 	}
 
 	repo := Inputs
-	repo.Install()
 
 	err := repo.Add(&item)
 	if err != nil {
@@ -25,6 +32,13 @@ func TestAdd(t *testing.T) {
 }
 
 func TestGetOne(t *testing.T) {
+	dbname := "test_2.db"
+	sqlitePath = dbname
+	os.Remove(dbname)
+	defer os.Remove(dbname)
+
+	Migrate()
+
 	item := &Input{
 		Protocol:  listeners.PROTOCOL_TCP,
 		Extractor: listeners.EXTRACTOR_ZLIB_JSON,
@@ -32,7 +46,6 @@ func TestGetOne(t *testing.T) {
 		Enabled:   1,
 	}
 
-	Inputs.Install()
 	Inputs.Add(item)
 
 	newItem, err := Inputs.GetOne(1)
@@ -49,6 +62,13 @@ func TestGetOne(t *testing.T) {
 }
 
 func TestGetAll(t *testing.T) {
+	dbname := "test_3.db"
+	sqlitePath = dbname
+	os.Remove(dbname)
+	defer os.Remove(dbname)
+
+	Migrate()
+
 	item1 := Input{
 		Protocol:  listeners.PROTOCOL_UDP,
 		Extractor: listeners.EXTRACTOR_ZLIB_JSON,
@@ -63,7 +83,6 @@ func TestGetAll(t *testing.T) {
 		Enabled:   0,
 	}
 
-	Inputs.Install()
 	Inputs.Add(&item1)
 	Inputs.Add(&item2)
 
@@ -81,6 +100,13 @@ func TestGetAll(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
+	dbname := "test_4.db"
+	sqlitePath = dbname
+	os.Remove(dbname)
+	defer os.Remove(dbname)
+
+	Migrate()
+
 	item := &Input{
 		Protocol:  listeners.PROTOCOL_UDP,
 		Extractor: listeners.EXTRACTOR_JSON,
@@ -88,7 +114,6 @@ func TestUpdate(t *testing.T) {
 		Enabled:   1,
 	}
 
-	Inputs.Install()
 	Inputs.Add(item)
 
 	item.Protocol = listeners.PROTOCOL_TCP
@@ -113,13 +138,19 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+	dbname := "test_5.db"
+	sqlitePath = dbname
+	os.Remove(dbname)
+	defer os.Remove(dbname)
+
+	Migrate()
+
 	item := &Input{
 		Protocol: listeners.PROTOCOL_UDP,
 		Addr:     ":8080",
 		Enabled:  1,
 	}
 
-	Inputs.Install()
 	Inputs.Add(item)
 
 	err := Inputs.Delete(item.Id)

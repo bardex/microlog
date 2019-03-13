@@ -147,31 +147,3 @@ func (inputs inputRepository) Delete(id int64) error {
 
 	return err
 }
-
-func (inputs inputRepository) Install() error {
-	inputs.memory = make(map[int64]*Input)
-
-	db, dbErr := getDb()
-	if dbErr != nil {
-		return dbErr
-	}
-
-	sql := `DROP TABLE inputs`
-
-	db.Exec(sql)
-
-	sql = `CREATE TABLE inputs(
-	  id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
-	  protocol TEXT,
-	  extractor TEXT,
-	  addr TEXT,
-	  enabled INTEGER,
-	  date_edit DATETIME
-	)`
-
-	_, err := db.Exec(sql)
-	if err != nil {
-		return err
-	}
-	return nil
-}

@@ -7,6 +7,8 @@ import (
 )
 
 func main() {
+	settings.Migrate()
+
 	wg := &sync.WaitGroup{}
 
 	// start web server
@@ -15,8 +17,6 @@ func main() {
 
 	// start inputs
 	repo := settings.Inputs
-
-	repo.Install()
 
 	inputs, _ := repo.GetAll()
 
