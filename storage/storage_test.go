@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"testing"
@@ -10,6 +11,23 @@ func TestAdd(t *testing.T) {
 	initDb(false)
 	defer closeDb()
 	fillDb(1000)
+}
+
+func TestAddByJson(t *testing.T) {
+	initDb(false)
+	defer closeDb()
+
+	data := []byte(`{"facility":"abc", "level":1, "percents":10.5, "date":"2018-10-20"}`)
+
+	fields := make(map[string]interface{})
+	json.Unmarshal(data, &fields)
+
+	tx, _ := db.Begin()
+	err := add(tx, fields)
+	if err != nil {
+		log.Fatal(err)
+	}
+	tx.Commit()
 }
 
 func TestFind(t *testing.T) {
@@ -61,7 +79,7 @@ func TestRemoveOld(t *testing.T) {
 	}
 }
 
-func TestCleanStr(t *testing.T)  {
+func TestCleanStr(t *testing.T) {
 	str := "123 abc def-.%<=>'\""
 	if cleanStr(str) != "123 abc def-.%<=>" {
 		t.Fatal("Not cleaned string")
@@ -73,7 +91,7 @@ func fillDb(countRows int64) {
 	tx, _ := db.Begin()
 	for messageNum = 1; messageNum <= countRows; messageNum++ {
 
-		fields := make(map[string]string)
+		fields := make(map[string]interface{})
 
 		var i int8
 		// Add string values
