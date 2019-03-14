@@ -1,14 +1,14 @@
 package storage
 
 import (
-	"os"
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
-	"regexp"
 )
 
 // Entity Field
@@ -60,39 +60,46 @@ func initDb(params ...bool) {
 	}
 
 	if isWithoutIndexes == false {
-		sql = `CREATE INDEX i_message_fields_kstring ON message_fields (k, string COLLATE NOCASE)`
-		_, err = db.Exec(sql)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		sql = `CREATE INDEX i_message_fields_kinteger ON message_fields (k, integer)`
-		_, err = db.Exec(sql)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		sql = `CREATE INDEX i_message_fields_kfloat ON message_fields (k, float)`
-		_, err = db.Exec(sql)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		sql = `CREATE INDEX i_message_fields_message_id ON message_fields (message_id)`
-		_, err = db.Exec(sql)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		sql = `CREATE INDEX i_message_fields_timestamp ON message_fields (timestamp)`
-		_, err = db.Exec(sql)
-		if err != nil {
-			log.Fatal(err)
-		}
+		initDbIndexes()
 	}
 }
 
-func add(tx *sql.Tx, fields map[string]string) error {
+func initDbIndexes() {
+	var sql string
+	var err error
+
+	sql = `CREATE INDEX i_message_fields_kstring ON message_fields (k, string COLLATE NOCASE)`
+	_, err = db.Exec(sql)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sql = `CREATE INDEX i_message_fields_kinteger ON message_fields (k, integer)`
+	_, err = db.Exec(sql)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sql = `CREATE INDEX i_message_fields_kfloat ON message_fields (k, float)`
+	_, err = db.Exec(sql)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sql = `CREATE INDEX i_message_fields_message_id ON message_fields (message_id)`
+	_, err = db.Exec(sql)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sql = `CREATE INDEX i_message_fields_timestamp ON message_fields (timestamp)`
+	_, err = db.Exec(sql)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func add(tx *sql.Tx, fields map[string]interface{}) error {
 	dbErr := openDb()
 	if dbErr != nil {
 		return dbErr
@@ -173,7 +180,7 @@ func find(tsStart int32, tsEnd int32, page int32, limit int32, searchFields []Fi
 
 	var sqlWhere2 string
 	if len(selectFields) > 0 {
-		sqlWhere2 = " AND mf.k IN ('"+strings.Join(selectFields, "', '")+"')"
+		sqlWhere2 = " AND mf.k IN ('" + strings.Join(selectFields, "', '") + "')"
 	}
 
 	if page < 1 {
@@ -185,7 +192,7 @@ func find(tsStart int32, tsEnd int32, page int32, limit int32, searchFields []Fi
 		"FROM message_fields mf WHERE mf.message_id IN (" +
 		"SELECT m1.message_id FROM message_fields m1 " + sqlJoin + sqlWhere + " " +
 		"GROUP BY m1.message_id ORDER BY m1.message_id DESC LIMIT " + fmt.Sprintf("%d", skip) + ", " + fmt.Sprintf("%d", limit) +
-		")"+sqlWhere2+" ORDER BY mf.message_id DESC"
+		")" + sqlWhere2 + " ORDER BY mf.message_id DESC"
 	//log.Fatal(sql) // TODO debug
 	rows, err := db.Query(sql)
 
@@ -244,19 +251,18 @@ func removeOld(ageSec int64) error {
 	return err
 }
 
-func getValueType(value string) string {
+func getValueType(value interface{}) string {
+	valueStr := fmt.Sprintf("%v", value)
 	valueType := "string"
-
-	_, err := strconv.ParseInt(value, 10, 64)
+	_, err := strconv.ParseInt(valueStr, 10, 64)
 	if err == nil {
 		valueType = "integer"
 	} else {
-		_, err := strconv.ParseFloat(value, 64)
+		_, err := strconv.ParseFloat(valueStr, 64)
 		if err == nil {
 			valueType = "float"
 		}
 	}
-
 	return valueType
 }
 
