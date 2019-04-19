@@ -5,60 +5,81 @@ import (
 )
 
 type udp struct {
-	Addr      string
-	Error     string
-	Active    bool
+	addr      string
+	error     string
+	active    bool
 	conn      *net.UDPConn
 	extractor Extractor
+	writer    Writer
 }
 
-func CreateUdp(addr string, extractor string) Listener {
+func CreateUdp(addr string, extractor Extractor, writer Writer) Listener {
 	return &udp{
-		Addr:      addr,
-		Active:    false,
-		extractor: createExtractor(extractor),
+		addr:      addr,
+		active:    false,
+		extractor: extractor,
+		writer:    writer,
 	}
 }
 
 // start listen
 func (udp *udp) Start() {
 	go (func() {
-		ServerAddr, err := net.ResolveUDPAddr("udp", udp.Addr)
+		ServerAddr, err := net.ResolveUDPAddr("udp", udp.addr)
 
 		if err != nil {
-			udp.Error = err.Error()
+			udp.error = err.Error()
 			return
 		}
 
 		ServerConn, err := net.ListenUDP("udp", ServerAddr)
 
 		if err != nil {
-			udp.Error = err.Error()
+			udp.error = err.Error()
 		}
 
 		udp.conn = ServerConn
-		udp.Active = true
-		udp.Error = ""
+		udp.active = true
+		udp.error = ""
 		defer udp.Stop()
 
-		buf := make([]byte, 64*1024*1024)
+		buf := make([]byte, 1024*1024)
 
 		for {
-			_, _, err := ServerConn.ReadFromUDP(buf)
+			n, addr, err := ServerConn.ReadFromUDP(buf)
 
 			if err != nil {
-				udp.Error = err.Error()
+				udp.error = err.Error()
 				break
 			}
+			row, err := udp.extractor.Extract(buf[:n])
+			row["remote_addr"] = addr.String()
 
-			udp.extractor.Extract(buf)
+			if err == nil {
+				udp.writer.Write(row)
+			} else {
+				udp.error = err.Error()
+			}
 		}
 	})()
 }
 
+// stop listen
 func (udp *udp) Stop() {
-	if udp.Active {
+	if udp.active {
 		udp.conn.Close()
 	}
-	udp.Active = false
+	udp.active = false
+}
+
+func (udp *udp) IsActive() bool {
+	return udp.active
+}
+
+func (udp *udp) GetError() string {
+	return udp.error
+}
+
+func (udp *udp) GetAddr() string {
+	return udp.addr
 }
