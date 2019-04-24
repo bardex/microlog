@@ -11,7 +11,7 @@ func TestUdp(t *testing.T) {
 	addr := ":8080"
 	tests := []string{"test 1", "test 2", "test 3"}
 	writer := WriterStub{}
-	extractor := createExtractor(EXTRACTOR_STRING)
+	extractor := CreateExtractor(EXTRACTOR_STRING)
 	udp := CreateUdp(addr, extractor, &writer)
 	udp.Start()
 
