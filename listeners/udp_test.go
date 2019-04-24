@@ -11,36 +11,56 @@ import (
 )
 
 func TestUdp(t *testing.T) {
-	udp, err := CreateUdp(":8080", "ZLIB_JSON")
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	go udp.Start()
+	addr := ":8080"
+	tests := []string{"test 1", "test 2", "test 3"}
+	writer := WriterStub{}
+	extractor := CreateExtractor(EXTRACTOR_STRING)
+	udp := CreateUdp(addr, extractor, &writer)
+	udp.Start()
 
 	time.Sleep(1 * time.Second)
 
-	for i := 0; i < 100; i++ {
-		udpSend(strconv.Itoa(i) + "\n")
-		if i >= 50 {
-			udp.Stop()
+	for _, test := range tests {
+		err := udpSend(test, addr)
+		if err != nil {
+			t.Fatal(err.Error())
 		}
+	}
+
+	time.Sleep(1 * time.Second)
+
+	for _, test := range tests {
+		if !writer.Find("msg", test) {
+			t.Fatalf("Message '%s' not found", test)
+		}
+	}
+
+	udp.Stop()
+
+	writer.ClearBuffer()
+
+	time.Sleep(1 * time.Second)
+
+	for _, test := range tests {
+		err := udpSend(test, addr)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+	}
+
+	if len(writer.ReadBuffer()) != 0 {
+		t.Fatal("Expects empty results")
 	}
 }
 
-func udpSend(msg string) error {
-	conn, err := net.Dial("udp", ":8080")
+
+func udpSend(msg string, addr string) error {
+	var err error
+	conn, err := net.Dial("udp", addr)
 	if err != nil {
 		return err
 	}
-
-	var b bytes.Buffer
-	w := zlib.NewWriter(&b)
-	w.Write([]byte(msg))
-	w.Close()
-
-	fmt.Fprintf(conn, b.String())
+	_, err = fmt.Fprint(conn, msg)
 	conn.Close()
-	return nil
+	return err
 }

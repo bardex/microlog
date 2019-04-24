@@ -2,6 +2,9 @@ package settings
 
 import "microlog/listeners"
 
+const PROTOCOL_UDP = "udp"
+const PROTOCOL_TCP = "tcp"
+
 // Entity Input
 type Input struct {
 	Id        int64
@@ -12,15 +15,17 @@ type Input struct {
 	listener  listeners.Listener
 }
 
-func (input *Input) GetListener() (listeners.Listener, error) {
+func (input *Input) GetListener() listeners.Listener {
 	if input.listener == nil {
-		listener, err := listeners.CreateListener(input.Protocol, input.Addr, input.Extractor)
-		if err != nil {
-			return listener, err
+		extractor := listeners.CreateExtractor(input.Extractor)
+		writer := &listeners.WriterStub{}
+
+		switch input.Protocol {
+		case PROTOCOL_UDP:
+			input.listener = listeners.CreateUdp(input.Addr, extractor, writer)
 		}
-		input.listener = listener
 	}
-	return input.listener, nil
+	return input.listener
 }
 
 // Repository inputRepository

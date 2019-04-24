@@ -24,21 +24,21 @@
         <td>{{ .Protocol }} / {{ .Extractor }}</td>
         <td>{{ .Addr }}</td>
         <td>
-            {{if .GetListener.Active }}
+            {{if .GetListener.IsActive }}
                 <span class="badge badge-pill badge-success">Active</span>
             {{else}}
                 <span class="badge badge-pill badge-secondary">Inactive</span>
             {{end}}
         </td>
         <td>
-            {{if .GetListener.Error }}
+            {{if .GetListener.GetError }}
                 <div class="alert alert-danger" role="alert">
-                    {{ .GetListener.Error }}
+                    {{ .GetListener.GetError }}
                 </div>
             {{end}}
         </td>
         <td class="row">
-            {{ if .GetListener.Active }}
+            {{ if .GetListener.IsActive }}
                 <div class="col-2">
                     <form action="/input/stop/{{ .Id }}" method="post">
                         <input type="submit" class="btn btn-danger btn-sm" value="Stop">
