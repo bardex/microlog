@@ -26,18 +26,10 @@ func TestUdp(t *testing.T) {
 
 	time.Sleep(1 * time.Second)
 
-	results := writer.ReadBuffer()
-	founded := 0
 	for _, test := range tests {
-		for _, result := range results {
-			if test == result["msg"].(string) {
-				founded++
-			}
+		if !writer.Find("msg", test) {
+			t.Fatalf("Message '%s' not found", test)
 		}
-	}
-
-	if founded != len(tests) {
-		t.Fatal("Results not match")
 	}
 
 	udp.Stop()
@@ -53,9 +45,7 @@ func TestUdp(t *testing.T) {
 		}
 	}
 
-	results = writer.ReadBuffer()
-
-	if len(results) != 0 {
+	if len(writer.ReadBuffer()) != 0 {
 		t.Fatal("Expects empty results")
 	}
 }

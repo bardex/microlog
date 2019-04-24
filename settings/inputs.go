@@ -17,9 +17,12 @@ type Input struct {
 
 func (input *Input) GetListener() listeners.Listener {
 	if input.listener == nil {
+		extractor := listeners.CreateExtractor(input.Extractor)
+		writer := &listeners.WriterStub{}
+
 		switch input.Protocol {
 		case PROTOCOL_UDP:
-			input.listener = listeners.CreateUdp(input.Addr, input.Extractor)
+			input.listener = listeners.CreateUdp(input.Addr, extractor, writer)
 		}
 	}
 	return input.listener

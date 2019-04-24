@@ -1,9 +1,5 @@
 package listeners
 
-type Writer interface {
-	Write(map[string]interface{}) error
-}
-
 type WriterStub struct {
 	buffer []map[string]interface{}
 }
@@ -21,3 +17,11 @@ func (writer *WriterStub) ClearBuffer() {
 	writer.buffer = make([]map[string]interface{}, 0, 10)
 }
 
+func (writer *WriterStub) Find(key string, value string) bool {
+	for _, item := range writer.buffer {
+		if value == item[key].(string) {
+			return true
+		}
+	}
+	return false
+}

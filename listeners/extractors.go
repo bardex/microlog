@@ -17,11 +17,7 @@ var ExtractorsList = map[string]string{
 	EXTRACTOR_STRING:    "String",
 }
 
-type Extractor interface {
-	Extract([]byte) (map[string]interface{}, error)
-}
-
-func createExtractor(name string) Extractor {
+func CreateExtractor(name string) Extractor {
 	var e Extractor
 	switch name {
 	case EXTRACTOR_ZLIB_JSON:
