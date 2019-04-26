@@ -18,13 +18,7 @@ var Extractors = []Extractor{
 	StringExtractor{},
 }
 
-type Extractor interface {
-	Extract([]byte) (map[string]interface{}, error)
-	GetName() string
-	GetDescription() string
-}
-
-func createExtractor(name string) (Extractor, error) {
+func CreateExtractor(name string) (Extractor, error) {
 	for _, v := range Extractors {
 		if v.GetName() == name {
 			ext := v

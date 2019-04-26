@@ -66,14 +66,13 @@ func (udp *udp) Start() {
 
 // stop listen
 func (udp *udp) Stop() {
-	if udp.Active {
+	if udp.active {
 		if udp.conn != nil {
 			_ = udp.conn.Close()
 		}
 	}
-	udp.Active = false
-	udp.conn = nil
 	udp.active = false
+	udp.conn = nil
 }
 
 func (udp *udp) IsActive() bool {

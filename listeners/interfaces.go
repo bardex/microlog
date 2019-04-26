@@ -10,6 +10,8 @@ type Listener interface {
 
 type Extractor interface {
 	Extract([]byte) (map[string]interface{}, error)
+	GetName() string
+	GetDescription() string
 }
 
 type Writer interface {

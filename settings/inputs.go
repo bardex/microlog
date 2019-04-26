@@ -17,7 +17,7 @@ type Input struct {
 
 func (input *Input) GetListener() listeners.Listener {
 	if input.listener == nil {
-		extractor := listeners.CreateExtractor(input.Extractor)
+		extractor, _ := listeners.CreateExtractor(input.Extractor)
 		writer := &listeners.WriterStub{}
 
 		switch input.Protocol {
