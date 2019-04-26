@@ -9,10 +9,14 @@ import (
 )
 
 func TestStringExtract(t *testing.T) {
-	extractor := StringExtractor{}
+	extractor, err := GetExtractor(EXTRACTOR_STRING)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	input := "ABCDEFGH"
-	buffer := []byte(input)
-	output, err := extractor.Extract(buffer)
+	output, err := extractor.Extract([]byte(input))
 
 	if err != nil {
 		t.Fatal(err)
@@ -24,6 +28,12 @@ func TestStringExtract(t *testing.T) {
 }
 
 func TestJsonExtract(t *testing.T) {
+	extractor, err := GetExtractor(EXTRACTOR_JSON)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	in := make(map[string]interface{})
 	in["facility"] = "test"
 	in["level"] = 1
@@ -31,7 +41,6 @@ func TestJsonExtract(t *testing.T) {
 	in["date"] = "2018-10-20"
 
 	data, _ := json.Marshal(in)
-	extractor := JsonExtractor{}
 	out, err := extractor.Extract(data)
 
 	if err != nil {
@@ -50,6 +59,12 @@ func TestJsonExtract(t *testing.T) {
 }
 
 func TestZlibJsonExtract(t *testing.T) {
+	extractor, err := GetExtractor(EXTRACTOR_ZLIB_JSON)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	in := make(map[string]interface{})
 	in["facility"] = "test"
 	in["level"] = 1
@@ -65,7 +80,6 @@ func TestZlibJsonExtract(t *testing.T) {
 
 	data = []byte(b.String())
 
-	extractor := ZlibJsonExtractor{}
 	out, err := extractor.Extract(data)
 
 	if err != nil {
@@ -83,35 +97,8 @@ func TestZlibJsonExtract(t *testing.T) {
 	}
 }
 
-func TestExtractorFactory(t *testing.T) {
-	jsonExt, err := createExtractor("JSON")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if jsonExt.GetName() != "JSON" {
-		t.Fatal("Not JSON extractor")
-	}
-
-	zlibJsonExt, err := createExtractor("ZLIB_JSON")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if zlibJsonExt.GetName() != "ZLIB_JSON" {
-		t.Fatal("Not ZLIB_JSON extractor")
-	}
-
-	stringExt, err := createExtractor("STRING")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if stringExt.GetName() != "STRING" {
-		t.Fatal("Not STRING extractor")
-	}
-
-	_, notNilError := createExtractor("any")
+func TestNotFoundExtractor(t *testing.T) {
+	_, notNilError := GetExtractor("any")
 	if notNilError == nil {
 		t.Fatal("Expected error")
 	}

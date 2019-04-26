@@ -1,5 +1,9 @@
 package listeners
 
+type Writer interface {
+	Write(map[string]interface{}) error
+}
+
 type WriterStub struct {
 	buffer []map[string]interface{}
 }

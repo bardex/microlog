@@ -1,7 +1,6 @@
 package settings
 
 import (
-	"microlog/listeners"
 	"os"
 	"testing"
 )
@@ -15,8 +14,8 @@ func TestAdd(t *testing.T) {
 	Migrate()
 
 	item := Input{
-		Protocol:  listeners.PROTOCOL_UDP,
-		Extractor: listeners.EXTRACTOR_ZLIB_JSON,
+		Protocol:  "udp",
+		Extractor: "JSON",
 		Addr:      ":8080",
 		Enabled:   1,
 	}
@@ -40,8 +39,8 @@ func TestGetOne(t *testing.T) {
 	Migrate()
 
 	item := &Input{
-		Protocol:  listeners.PROTOCOL_TCP,
-		Extractor: listeners.EXTRACTOR_ZLIB_JSON,
+		Protocol:  "udp",
+		Extractor: "JSON",
 		Addr:      ":8081",
 		Enabled:   1,
 	}
@@ -70,15 +69,15 @@ func TestGetAll(t *testing.T) {
 	Migrate()
 
 	item1 := Input{
-		Protocol:  listeners.PROTOCOL_UDP,
-		Extractor: listeners.EXTRACTOR_ZLIB_JSON,
+		Protocol:  "udp",
+		Extractor: "JSON",
 		Addr:      ":8080",
 		Enabled:   1,
 	}
 
 	item2 := Input{
-		Protocol:  listeners.PROTOCOL_TCP,
-		Extractor: listeners.EXTRACTOR_JSON,
+		Protocol:  "udp",
+		Extractor: "JSON",
 		Addr:      ":8081",
 		Enabled:   0,
 	}
@@ -108,17 +107,17 @@ func TestUpdate(t *testing.T) {
 	Migrate()
 
 	item := &Input{
-		Protocol:  listeners.PROTOCOL_UDP,
-		Extractor: listeners.EXTRACTOR_JSON,
+		Protocol:  "udp",
+		Extractor: "JSON",
 		Addr:      ":8080",
 		Enabled:   1,
 	}
 
 	Inputs.Add(item)
 
-	item.Protocol = listeners.PROTOCOL_TCP
+	item.Protocol = "udp"
 	item.Addr = ":8081"
-	item.Extractor = listeners.EXTRACTOR_ZLIB_JSON
+	item.Extractor = "JSON"
 	item.Enabled = 0
 
 	Inputs.Update(item)
@@ -146,7 +145,7 @@ func TestDelete(t *testing.T) {
 	Migrate()
 
 	item := &Input{
-		Protocol: listeners.PROTOCOL_UDP,
+		Protocol: "udp",
 		Addr:     ":8080",
 		Enabled:  1,
 	}

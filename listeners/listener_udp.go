@@ -4,6 +4,8 @@ import (
 	"net"
 )
 
+const PROTOCOL_UDP = "udp"
+
 type udp struct {
 	addr      string
 	error     string
