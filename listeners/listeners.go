@@ -10,14 +10,14 @@ type Listener interface {
 
 func CreateListenerByParams(protocol string, addr string, extractor string) Listener {
 	ext, _ := GetExtractor(extractor)
-	writer := &WriterStub{}
+	writer := &StorageMemory{}
 
 	switch protocol {
 	case PROTOCOL_UDP:
 		return CreateUdp(addr, ext, writer)
 	}
 
-	return &nilListener{}
+	return nil
 }
 
 type nilListener struct {}

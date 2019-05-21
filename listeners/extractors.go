@@ -21,7 +21,7 @@ func GetExtractor(name string) (Extractor, error) {
 	if ok {
 		return ext, nil
 	} else {
-		return NilExtractor{}, fmt.Errorf("extractor %s not found", name)
+		return nil, fmt.Errorf("extractor %s not found", name)
 	}
 }
 
@@ -29,18 +29,4 @@ func GetExtractor(name string) (Extractor, error) {
 func AddExtractor(extractor Extractor) {
 	name := extractor.GetName()
 	extractors[name] = extractor
-}
-
-type NilExtractor struct{}
-
-func (e NilExtractor) Extract(buf []byte) (map[string]interface{}, error) {
-	return make(map[string]interface{}), nil
-}
-
-func (e NilExtractor) GetName() string {
-	return "NIL"
-}
-
-func (e NilExtractor) GetDescription() string {
-	return "Nil"
 }

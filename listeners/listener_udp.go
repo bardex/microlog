@@ -12,10 +12,10 @@ type udp struct {
 	active    bool
 	conn      *net.UDPConn
 	extractor Extractor
-	writer    Writer
+	writer    Storage
 }
 
-func CreateUdp(addr string, extractor Extractor, writer Writer) Listener {
+func CreateUdp(addr string, extractor Extractor, writer Storage) Listener {
 	return &udp{
 		addr:      addr,
 		active:    false,
@@ -43,6 +43,7 @@ func (udp *udp) Start() {
 		udp.conn = ServerConn
 		udp.active = true
 		udp.error = ""
+
 		defer udp.Stop()
 
 		buf := make([]byte, 1024*1024)
