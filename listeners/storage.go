@@ -7,12 +7,3 @@ type Storage interface {
 	// search messages
 	//Search(SearchFilter) []map[string]interface{}
 }
-
-type SearchFilter struct {
-
-}
-
-
-
-
-

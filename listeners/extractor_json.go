@@ -1,8 +1,8 @@
 package listeners
 
 import (
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 	"io"
 )
 

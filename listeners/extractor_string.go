@@ -1,6 +1,5 @@
 package listeners
 
-
 // =========================================
 //  STRING EXTRACTOR implements Extractor
 // =========================================

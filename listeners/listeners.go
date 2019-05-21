@@ -20,7 +20,7 @@ func CreateListenerByParams(protocol string, addr string, extractor string) List
 	return nil
 }
 
-type nilListener struct {}
+type nilListener struct{}
 
 func (udp *nilListener) Start() {
 }
@@ -39,4 +39,3 @@ func (udp *nilListener) GetError() string {
 func (udp *nilListener) GetAddr() string {
 	return ""
 }
-

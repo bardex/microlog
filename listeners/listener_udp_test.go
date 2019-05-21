@@ -50,7 +50,6 @@ func TestUdp(t *testing.T) {
 	}
 }
 
-
 func udpSend(msg string, addr string) error {
 	var err error
 	conn, err := net.Dial("udp", addr)
