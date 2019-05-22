@@ -34,7 +34,7 @@ func TestUdp(t *testing.T) {
 
 	udp.Stop()
 
-	writer.ClearBuffer()
+	writer.Clear()
 
 	time.Sleep(1 * time.Second)
 

@@ -5,5 +5,5 @@ type Storage interface {
 	Write(map[string]interface{}) error
 
 	// search messages
-	//Search(SearchFilter) []map[string]interface{}
+	Search(SearchFilter) []map[string]interface{}
 }
