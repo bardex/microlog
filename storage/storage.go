@@ -24,6 +24,15 @@ type Message struct {
 	Fields    []Field
 }
 
+type Storage interface {
+	// write message
+	Write(map[string]interface{}) error
+
+	// search messages
+	Search(SearchFilter) ([]Message, error)
+}
+
+
 // first param: withoutIndexes=false
 func initDb(params ...bool) {
 

@@ -5,14 +5,15 @@ import (
 	"net"
 	"testing"
 	"time"
+	"microlog/storage"
 )
 
 func TestUdp(t *testing.T) {
 	addr := ":8080"
 	tests := []string{"test 1", "test 2", "test 3"}
-	writer := StorageMemory{}
+	storage := storage.StorageStub{}
 	extractor, _ := GetExtractor(EXTRACTOR_STRING)
-	udp := CreateUdp(addr, extractor, &writer)
+	udp := CreateUdp(addr, extractor, &storage)
 	udp.Start()
 
 	time.Sleep(1 * time.Second)
@@ -27,14 +28,14 @@ func TestUdp(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	for _, test := range tests {
-		if !writer.Find("msg", test) {
+		if !storage.Find("msg", test) {
 			t.Fatalf("Message '%s' not found", test)
 		}
 	}
 
 	udp.Stop()
 
-	writer.Clear()
+	storage.Clear()
 
 	time.Sleep(1 * time.Second)
 
@@ -45,7 +46,7 @@ func TestUdp(t *testing.T) {
 		}
 	}
 
-	if len(writer.ReadBuffer()) != 0 {
+	if len(storage.ReadAll()) != 0 {
 		t.Fatal("Expects empty results")
 	}
 }

@@ -2,6 +2,7 @@ package listeners
 
 import (
 	"net"
+	"microlog/storage"
 )
 
 const PROTOCOL_UDP = "udp"
@@ -12,10 +13,10 @@ type udp struct {
 	active    bool
 	conn      *net.UDPConn
 	extractor Extractor
-	storage   Storage
+	storage   storage.Storage
 }
 
-func CreateUdp(addr string, extractor Extractor, storage Storage) Listener {
+func CreateUdp(addr string, extractor Extractor, storage storage.Storage) Listener {
 	return &udp{
 		addr:      addr,
 		active:    false,

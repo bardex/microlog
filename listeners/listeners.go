@@ -1,5 +1,7 @@
 package listeners
 
+import "microlog/storage"
+
 type Listener interface {
 	Start()
 	Stop()
@@ -10,11 +12,11 @@ type Listener interface {
 
 func CreateListenerByParams(protocol string, addr string, extractor string) Listener {
 	ext, _ := GetExtractor(extractor)
-	writer := &StorageMemory{}
+	storage := &storage.StorageStub{}
 
 	switch protocol {
 	case PROTOCOL_UDP:
-		return CreateUdp(addr, ext, writer)
+		return CreateUdp(addr, ext, storage)
 	}
 
 	return nil
