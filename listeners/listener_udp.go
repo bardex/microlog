@@ -12,15 +12,15 @@ type udp struct {
 	active    bool
 	conn      *net.UDPConn
 	extractor Extractor
-	writer    Writer
+	storage   Storage
 }
 
-func CreateUdp(addr string, extractor Extractor, writer Writer) Listener {
+func CreateUdp(addr string, extractor Extractor, storage Storage) Listener {
 	return &udp{
 		addr:      addr,
 		active:    false,
 		extractor: extractor,
-		writer:    writer,
+		storage:   storage,
 	}
 }
 
@@ -43,6 +43,7 @@ func (udp *udp) Start() {
 		udp.conn = ServerConn
 		udp.active = true
 		udp.error = ""
+
 		defer udp.Stop()
 
 		buf := make([]byte, 1024*1024)
@@ -58,7 +59,7 @@ func (udp *udp) Start() {
 			row["remote_addr"] = addr.String()
 
 			if err == nil {
-				udp.writer.Write(row)
+				udp.storage.Write(row)
 			} else {
 				udp.error = err.Error()
 			}

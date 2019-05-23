@@ -10,7 +10,7 @@ import (
 func TestUdp(t *testing.T) {
 	addr := ":8080"
 	tests := []string{"test 1", "test 2", "test 3"}
-	writer := WriterStub{}
+	writer := StorageMemory{}
 	extractor, _ := GetExtractor(EXTRACTOR_STRING)
 	udp := CreateUdp(addr, extractor, &writer)
 	udp.Start()
@@ -34,7 +34,7 @@ func TestUdp(t *testing.T) {
 
 	udp.Stop()
 
-	writer.ClearBuffer()
+	writer.Clear()
 
 	time.Sleep(1 * time.Second)
 
@@ -49,7 +49,6 @@ func TestUdp(t *testing.T) {
 		t.Fatal("Expects empty results")
 	}
 }
-
 
 func udpSend(msg string, addr string) error {
 	var err error

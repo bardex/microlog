@@ -1,8 +1,8 @@
 package listeners
 
 import (
-	"compress/zlib"
 	"bytes"
+	"compress/zlib"
 	"encoding/json"
 	"io"
 )
@@ -10,7 +10,6 @@ import (
 // =========================================
 //  ZLIB + JSON EXTRACTOR implements Extractor
 // =========================================
-
 
 const EXTRACTOR_ZLIB_JSON = "ZLIB_JSON"
 
