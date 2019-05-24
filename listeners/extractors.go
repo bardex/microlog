@@ -12,12 +12,12 @@ type Extractor interface {
 	GetDescription() string
 }
 
-// List of available extractors
-var extractors = make(map[string]Extractor, 0)
+// List of available Extractors
+var Extractors = make(map[string]Extractor, 0)
 
 // Get extractor by name
 func GetExtractor(name string) (Extractor, error) {
-	ext, ok := extractors[name]
+	ext, ok := Extractors[name]
 	if ok {
 		return ext, nil
 	} else {
@@ -28,5 +28,5 @@ func GetExtractor(name string) (Extractor, error) {
 // Register extractor
 func AddExtractor(extractor Extractor) {
 	name := extractor.GetName()
-	extractors[name] = extractor
+	Extractors[name] = extractor
 }

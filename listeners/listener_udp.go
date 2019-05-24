@@ -39,6 +39,7 @@ func (udp *udp) Start() {
 
 		if err != nil {
 			udp.error = err.Error()
+			return
 		}
 
 		udp.conn = ServerConn

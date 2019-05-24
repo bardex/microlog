@@ -22,7 +22,7 @@ func main() {
 
 	for _, input := range inputs {
 		if input.Enabled == 1 {
-			listener, _ := input.GetListener()
+			listener := input.GetListener()
 			listener.Start()
 		}
 	}

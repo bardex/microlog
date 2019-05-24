@@ -28,7 +28,7 @@ func StopInput(c *gin.Context) {
 	input, err := settings.Inputs.GetOne(id)
 
 	if err == nil {
-		listener, _ := input.GetListener()
+		listener := input.GetListener()
 		listener.Stop()
 		input.Enabled = 0
 		settings.Inputs.Update(input)
@@ -43,7 +43,7 @@ func StartInput(c *gin.Context) {
 	input, err := settings.Inputs.GetOne(id)
 
 	if err == nil {
-		listener, _ := input.GetListener()
+		listener := input.GetListener()
 		listener.Start()
 		input.Enabled = 1
 		settings.Inputs.Update(input)

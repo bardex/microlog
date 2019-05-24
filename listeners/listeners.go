@@ -17,6 +17,8 @@ func CreateListenerByParams(protocol string, addr string, extractor string) List
 	switch protocol {
 	case PROTOCOL_UDP:
 		return CreateUdp(addr, ext, storage)
+	case PROTOCOL_TCP:
+		return CreateTcp(addr, ext, storage)
 	}
 
 	return nil
