@@ -3,7 +3,6 @@ package listeners
 import (
 	"net"
 	"microlog/storage"
-	"fmt"
 )
 
 const PROTOCOL_TCP = "tcp"
@@ -50,34 +49,34 @@ func (tcp *tcp) Start() {
 				continue
 			}
 
-			go func(conn net.Conn) {
-				fmt.Println("Open TCP connection")
-
-				defer func() {
-					fmt.Println("Close TCP connection")
-					conn.Close()
-				}()
-
-				for {
-					input := make([]byte, 1024 * 1024)
-					n, err := conn.Read(input)
-					if err != nil {
-						tcp.error = err.Error()
-						break
-					}
-
-					row, err := tcp.extractor.Extract(input[0:n])
-					row["remote_addr"] = conn.RemoteAddr().String()
-
-					if err == nil {
-						tcp.storage.Write(row)
-					} else {
-						tcp.error = err.Error()
-					}
-				}
-			}(conn)
+			tcp.handleConn(conn)
 		}
 	})()
+}
+
+
+func (tcp *tcp) handleConn(conn net.Conn) {
+	defer func() {
+		conn.Close()
+	}()
+
+	for {
+		input := make([]byte, 4 * 1024)
+		n, err := conn.Read(input)
+		if err != nil {
+			tcp.error = err.Error()
+			break
+		}
+
+		row, err := tcp.extractor.Extract(input[0:n])
+		row["remote_addr"] = conn.RemoteAddr().String()
+
+		if err == nil {
+			tcp.storage.Write(row)
+		} else {
+			tcp.error = err.Error()
+		}
+	}
 }
 
 // stop listen

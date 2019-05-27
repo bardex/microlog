@@ -48,7 +48,7 @@ func (udp *udp) Start() {
 
 		defer udp.Stop()
 
-		buf := make([]byte, 1024*1024)
+		buf := make([]byte, 4*1024)
 
 		for {
 			n, addr, err := ServerConn.ReadFromUDP(buf)
