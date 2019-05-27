@@ -1,14 +1,11 @@
 package storage
 
-import "fmt"
-
 type StorageStub struct {
 	buffer []map[string]interface{}
 }
 
 func (writer *StorageStub) Write(row map[string]interface{}) error {
 	writer.buffer = append(writer.buffer, row)
-	fmt.Printf("%#v", row)
 	return nil
 }
 
