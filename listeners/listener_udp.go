@@ -16,12 +16,12 @@ type udp struct {
 	storage   storage.Storage
 }
 
-func CreateUdp(addr string, extractor Extractor, storage storage.Storage) Listener {
+func CreateUdp(addr string, extractor Extractor, storage *storage.Storage) Listener {
 	return &udp{
 		addr:      addr,
 		active:    false,
 		extractor: extractor,
-		storage:   storage,
+		storage:   *storage,
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"encoding/json"
 )
 
 // Entity Field
@@ -24,14 +25,39 @@ type Message struct {
 	Fields    []Field
 }
 
-type Storage interface {
-	// write message
-	Write(map[string]interface{}) error
+type Storage struct {}
 
-	// search messages
-	Search(SearchFilter) ([]Message, error)
+func (writer *Storage) Write(row map[string]interface{}) error {
+	data := []byte(fmt.Sprintf("%v", row["msg"]))
+
+	fields := make(map[string]interface{})
+	json.Unmarshal(data, &fields)
+
+	tx, _ := db.Begin()
+	err := add(tx, fields)
+	if err != nil {
+		return err
+	}
+	tx.Commit()
+
+	return nil
 }
 
+func (writer *Storage) Init() {
+	initDb(false)
+}
+
+func (writer *Storage) Close() {
+	closeDb()
+}
+
+func (writer *Storage) Clear(ageSec int64) error {
+	return removeOld(ageSec)
+}
+
+func (writer *Storage) Find(tsStart int32, tsEnd int32, page int32, limit int32, searchFields []Field, selectFields []string) ([]Message, error) {
+	return find(tsStart, tsEnd, page, limit, searchFields, selectFields)
+}
 
 // first param: withoutIndexes=false
 func initDb(params ...bool) {
@@ -44,18 +70,18 @@ func initDb(params ...bool) {
 	os.Remove(sqlitePath)
 	openDb()
 
-	var sql string
+	var query string
 	var err error
 
-	sql = `CREATE TABLE message(
+	query = `CREATE TABLE message(
       id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE
 	)`
-	_, err = db.Exec(sql)
+	_, err = db.Exec(query)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sql = `CREATE TABLE message_fields(
+	query = `CREATE TABLE message_fields(
 	  k TEXT NOT NULL,
 	  string TEXT,
 	  integer INTEGER,
@@ -63,7 +89,7 @@ func initDb(params ...bool) {
 	  timestamp INT,
 	  message_id INT
 	)`
-	_, err = db.Exec(sql)
+	_, err = db.Exec(query)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,35 +100,35 @@ func initDb(params ...bool) {
 }
 
 func initDbIndexes() {
-	var sql string
+	var query string
 	var err error
 
-	sql = `CREATE INDEX i_message_fields_kstring ON message_fields (k, string COLLATE NOCASE)`
-	_, err = db.Exec(sql)
+	query = `CREATE INDEX i_message_fields_kstring ON message_fields (k, string COLLATE NOCASE)`
+	_, err = db.Exec(query)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sql = `CREATE INDEX i_message_fields_kinteger ON message_fields (k, integer)`
-	_, err = db.Exec(sql)
+	query = `CREATE INDEX i_message_fields_kinteger ON message_fields (k, integer)`
+	_, err = db.Exec(query)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sql = `CREATE INDEX i_message_fields_kfloat ON message_fields (k, float)`
-	_, err = db.Exec(sql)
+	query = `CREATE INDEX i_message_fields_kfloat ON message_fields (k, float)`
+	_, err = db.Exec(query)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sql = `CREATE INDEX i_message_fields_message_id ON message_fields (message_id)`
-	_, err = db.Exec(sql)
+	query = `CREATE INDEX i_message_fields_message_id ON message_fields (message_id)`
+	_, err = db.Exec(query)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sql = `CREATE INDEX i_message_fields_timestamp ON message_fields (timestamp)`
-	_, err = db.Exec(sql)
+	query = `CREATE INDEX i_message_fields_timestamp ON message_fields (timestamp)`
+	_, err = db.Exec(query)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -197,28 +223,29 @@ func find(tsStart int32, tsEnd int32, page int32, limit int32, searchFields []Fi
 	}
 	skip := limit * (page - 1)
 
-	sql := "SELECT mf.k, COALESCE (mf.string, mf.integer, mf.float) AS value, mf.timestamp, mf.message_id  " +
+	query := "SELECT mf.k, COALESCE (mf.string, mf.integer, mf.float) AS value, mf.timestamp, mf.message_id  " +
 		"FROM message_fields mf WHERE mf.message_id IN (" +
 		"SELECT m1.message_id FROM message_fields m1 " + sqlJoin + sqlWhere + " " +
 		"GROUP BY m1.message_id ORDER BY m1.message_id DESC LIMIT " + fmt.Sprintf("%d", skip) + ", " + fmt.Sprintf("%d", limit) +
 		")" + sqlWhere2 + " ORDER BY mf.message_id DESC"
-	//log.Fatal(sql) // TODO debug
-	rows, err := db.Query(sql)
+	//log.Fatal(query) // TODO debug
+	rows, err := db.Query(query)
 
 	if err != nil {
 		return messages, err
 	}
 	defer rows.Close()
 
-	fields := []Field{}
+	var messageId int64
 	var messageIdPrev int64
-	var timePrev string
+	var messageTime string
+
+	messageFields := map[int64][]Field{}
 	for rows.Next() {
 		var key string
 		var value string
-		var time string
-		var messageId int64
-		err := rows.Scan(&key, &value, &time, &messageId)
+
+		err := rows.Scan(&key, &value, &messageTime, &messageId)
 		if err != nil {
 			return messages, err
 		}
@@ -226,20 +253,23 @@ func find(tsStart int32, tsEnd int32, page int32, limit int32, searchFields []Fi
 		// save prev message if current field is for new message
 		if messageIdPrev != messageId {
 			messages = append(messages, Message{
-				MessageId: messageIdPrev,
-				Time:      timePrev,
-				Fields:    fields,
+				MessageId: messageId,
+				Time:      messageTime,
+				Fields:    []Field{},
 			})
 
-			fields = []Field{}
 			messageIdPrev = messageId
-			timePrev = time
 		}
 
-		fields = append(fields, Field{
+		messageFields[messageId] = append(messageFields[messageId], Field{
 			Key:   key,
 			Value: value,
 		})
+
+	}
+
+	for index, mes := range messages {
+		messages[index].Fields = messageFields[mes.MessageId]
 	}
 
 	return messages, nil
