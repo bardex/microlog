@@ -4,7 +4,6 @@ import (
 	"net"
 	"microlog/storage"
 	"fmt"
-	"sync"
 )
 
 const PROTOCOL_TCP = "tcp"
@@ -43,7 +42,6 @@ func (tcp *tcp) Start() {
 
 		defer tcp.Stop()
 
-		mu := &sync.Mutex{}
 		for {
 			conn, err := listener.Accept()
 
@@ -52,7 +50,7 @@ func (tcp *tcp) Start() {
 				continue
 			}
 
-			go func(conn net.Conn, mu *sync.Mutex) {
+			go func(conn net.Conn) {
 				fmt.Println("Open TCP connection")
 
 				defer func() {
@@ -72,14 +70,12 @@ func (tcp *tcp) Start() {
 					row["remote_addr"] = conn.RemoteAddr().String()
 
 					if err == nil {
-						mu.Lock()
 						tcp.storage.Write(row)
-						mu.Unlock()
 					} else {
 						tcp.error = err.Error()
 					}
 				}
-			}(conn, mu)
+			}(conn)
 		}
 	})()
 }
