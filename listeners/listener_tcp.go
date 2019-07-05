@@ -49,7 +49,7 @@ func (tcp *tcp) Start() {
 				continue
 			}
 
-			tcp.handleConn(conn)
+			go tcp.handleConn(conn)
 		}
 	})()
 }

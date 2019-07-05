@@ -19,10 +19,7 @@ func TestTcp(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	for _, test := range tests {
-		err := tcpSend(test, addr)
-		if err != nil {
-			t.Fatal(err.Error())
-		}
+		go tcpSend(test, addr, t)
 	}
 
 	time.Sleep(1 * time.Second)
@@ -46,13 +43,17 @@ func TestTcp(t *testing.T) {
 	}
 }
 
-func tcpSend(msg string, addr string) error {
-	var err error
+func tcpSend(msg string, addr string, t *testing.T) {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
-		return err
+		t.Fatal(err.Error())
 	}
+
+	defer conn.Close()
+
 	_, err = fmt.Fprint(conn, msg)
-	conn.Close()
-	return err
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 }
