@@ -6,14 +6,22 @@ import (
 	"testing"
 	"time"
 	"microlog/storage"
+	"encoding/json"
 )
 
 func TestTcp(t *testing.T) {
-	addr := ":8088"
-	tests := []string{"test 1", "test 2", "test 3"}
-	storage := storage.StorageStub{}
+	addr := ":8080"
+	tests := []string{
+		`{"facility":"abc1", "level":1, "percents":11.5, "date":"2018-10-20"}`,
+		`{"facility":"abc2", "level":1, "percents":12.5, "date":"2018-11-21"}`,
+		`{"facility":"abc3", "level":1, "percents":13.5, "date":"2018-12-23"}`,
+	}
+	stor := storage.Storage{}
+	stor.Init()
+	defer stor.Close()
+
 	extractor, _ := GetExtractor(EXTRACTOR_STRING)
-	tcp := CreateTcp(addr, extractor, &storage)
+	tcp := CreateTcp(addr, extractor, &stor)
 	tcp.Start()
 
 	time.Sleep(2 * time.Second)
@@ -25,14 +33,34 @@ func TestTcp(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	for _, test := range tests {
-		if !storage.Find("msg", test) {
+		data := []byte(test)
+
+		fields := make(map[string]interface{})
+		json.Unmarshal(data, &fields)
+
+		searchFields := []storage.Field{}
+
+		for key, value := range fields {
+			searchFields = append(searchFields, storage.Field{
+				Key:   fmt.Sprintf("%v", key),
+				Value: fmt.Sprintf("%v", value),
+			})
+		}
+
+		messages, err := stor.Find(0, 2000000000, 1, 100, searchFields, []string{})
+
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+
+		if len(messages) == 0 {
 			t.Fatalf("Message '%s' not found", test)
 		}
 	}
 
 	tcp.Stop()
 
-	storage.Clear()
+	//stor.Clear(0)
 
 	time.Sleep(1 * time.Second)
 

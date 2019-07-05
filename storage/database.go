@@ -12,8 +12,10 @@ var db *sql.DB
 func openDb() error {
 	var err error
 	if db == nil {
-		database, err := sql.Open("sqlite3", sqlitePath)
+		sourceName := "file:" + sqlitePath + "?cache=shared"
+		database, err := sql.Open("sqlite3", sourceName)
 		if err == nil {
+			database.SetMaxOpenConns(1)
 			_, err = database.Exec("PRAGMA synchronous=NORMAL")
 			if err != nil {
 				return err
