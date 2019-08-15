@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="/assets/bootstrap.min.css">
-    <title>microLog - {{ .title }}</title>
+    <title>microLog - [[ .title ]]</title>
 </head>
 
 <body>
 
+<div id="app">
 
-{{ template "menu.html" . }}
+[[ template "menu.html" . ]]
 
     <div class="container-fluid">
+        <router-view></router-view>

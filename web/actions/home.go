@@ -6,9 +6,12 @@ import (
 )
 
 func Home(c *gin.Context) {
+
+
+
 	c.HTML(
 		http.StatusOK,
 		"home.html",
-		gin.H{},
+		gin.H{"Name": "Vasya"},
 	)
 }

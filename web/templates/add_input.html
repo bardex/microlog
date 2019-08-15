@@ -1,4 +1,4 @@
-{{ template "header.html" .}}
+[[ template "header.html" .]]
 
 
 <h1>Add input</h1>
@@ -14,11 +14,11 @@
         </div>
         <div class="col-sm-2 my-1">
             <select class="form-control" name="extractor">
-                {{with .extractors }}
-                {{range . }}
-                    <option value="{{ .GetName }}">{{ .GetDescription }}</option>
-                {{end}}
-                {{end}}
+                [[with .extractors ]]
+                [[range . ]]
+                    <option value="[[ .GetName ]]">[[ .GetDescription ]]</option>
+                [[end]]
+                [[end]]
             </select>
         </div>
         <div class="col-sm-2 my-1">
@@ -31,4 +31,4 @@
 </form>
 
 
-{{ template "footer.html" .}}
+[[ template "footer.html" .]]
