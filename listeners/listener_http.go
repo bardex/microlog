@@ -18,12 +18,12 @@ type http struct {
 	storage   storage.Storage
 }
 
-func CreateHttp(addr string, extractor Extractor, storage storage.Storage) Listener {
+func CreateHttp(addr string, extractor Extractor, storage *storage.Storage) Listener {
 	return &http{
 		addr:      addr,
 		active:    false,
 		extractor: extractor,
-		storage:   storage,
+		storage:   *storage,
 	}
 }
 

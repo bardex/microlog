@@ -16,12 +16,12 @@ type tcp struct {
 	storage   storage.Storage
 }
 
-func CreateTcp(addr string, extractor Extractor, storage storage.Storage) Listener {
+func CreateTcp(addr string, extractor Extractor, storage *storage.Storage) Listener {
 	return &tcp{
 		addr:      addr,
 		active:    false,
 		extractor: extractor,
-		storage:   storage,
+		storage:   *storage,
 	}
 }
 

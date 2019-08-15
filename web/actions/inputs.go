@@ -8,17 +8,34 @@ import (
 	"strconv"
 )
 
+type inputJson struct {
+	Id       int64  `json:id`
+	Protocol string `json:protocol`
+	Addr     string `json:addr`
+	Active   bool   `json:active`
+	Error    string `json:error`
+}
+
 // All inputs
 func Inputs(c *gin.Context) {
 	inputs, _ := settings.Inputs.GetAll()
 
-	c.HTML(
+	data := make([]inputJson, 0, len(inputs))
+
+	for _, input := range inputs {
+		data = append(data,
+			inputJson{
+				Id:       input.Id,
+				Protocol: input.Protocol,
+				Addr:     input.Addr,
+				Active:   input.GetListener().IsActive(),
+				Error:    input.GetListener().GetError(),
+			})
+	}
+
+	c.JSON(
 		http.StatusOK,
-		"inputs.html",
-		gin.H{
-			"title":  "Inputs",
-			"inputs": inputs,
-		},
+		data,
 	)
 }
 

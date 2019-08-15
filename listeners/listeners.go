@@ -19,27 +19,9 @@ func CreateListenerByParams(protocol string, addr string, extractor string) List
 		return CreateUdp(addr, ext, stor)
 	case PROTOCOL_TCP:
 		return CreateTcp(addr, ext, stor)
+	case PROTOCOL_HTTP:
+		return CreateHttp(addr, ext, stor)
 	}
 
 	return nil
-}
-
-type nilListener struct{}
-
-func (udp *nilListener) Start() {
-}
-
-func (udp *nilListener) Stop() {
-}
-
-func (udp *nilListener) IsActive() bool {
-	return false
-}
-
-func (udp *nilListener) GetError() string {
-	return ""
-}
-
-func (udp *nilListener) GetAddr() string {
-	return ""
 }
