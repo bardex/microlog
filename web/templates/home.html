@@ -1,7 +1,40 @@
-[[ template "header.html" .]]
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="/assets/bootstrap.min.css">
+    <title>microLog - [[ .title ]]</title>
+</head>
+
+<body>
+
+<div id="app">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">microLog</a>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/search">Search</a>
+                </li>
+                <li class="nav-item">
+                    <router-link to="/inputs">Inputs</router-link>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container-fluid" >
+
+        <router-view></router-view>
+
+    </div>
+
+</div>
 
 
-<h1>Welcome! [[ .Name ]]</h1>
+<script src="/assets/main.js"></script>
 
-
-[[ template "footer.html" .]]
+</body>
+</html>

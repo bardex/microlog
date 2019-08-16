@@ -13,6 +13,6 @@ func initRoutes() {
 	router.GET("/search", actions.Search)
 
 	// static files
-	router.Static("/assets", "./web/assets")
-	router.StaticFile("/favicon.ico", "./web/assets/favicon.ico")
+	router.Static("/assets", "./web/assets/public")
+	router.StaticFile("/favicon.ico", "./web/assets/public/favicon.ico")
 }
