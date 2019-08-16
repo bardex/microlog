@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -9,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"encoding/json"
 )
 
 // Entity Field
@@ -25,7 +25,7 @@ type Message struct {
 	Fields    []Field
 }
 
-type Storage struct {}
+type Storage struct{}
 
 func (writer *Storage) Write(row map[string]interface{}) error {
 	data := []byte(fmt.Sprintf("%v", row["msg"]))

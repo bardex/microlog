@@ -1,8 +1,8 @@
 package listeners
 
 import (
-	"net"
 	"microlog/storage"
+	"net"
 )
 
 const PROTOCOL_UDP = "udp"

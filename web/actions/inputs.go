@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"microlog/listeners"
 	"microlog/settings"
@@ -9,11 +10,13 @@ import (
 )
 
 type inputJson struct {
-	Id       int64  `json:id`
-	Protocol string `json:protocol`
-	Addr     string `json:addr`
-	Active   bool   `json:active`
-	Error    string `json:error`
+	Id       int64  `json:"id"`
+	Protocol string `json:"protocol"`
+	Addr     string `json:"addr"`
+	Active   bool   `json:"active"`
+	Error    string `json:"error"`
+	StartUrl string `json:"start_url"`
+	StopUrl  string `json:"stop_url"`
 }
 
 // All inputs
@@ -30,6 +33,8 @@ func Inputs(c *gin.Context) {
 				Addr:     input.Addr,
 				Active:   input.GetListener().IsActive(),
 				Error:    input.GetListener().GetError(),
+				StartUrl: fmt.Sprintf("/input/start/%d", input.Id),
+				StopUrl:  fmt.Sprintf("/input/stop/%d", input.Id),
 			})
 	}
 
@@ -49,9 +54,19 @@ func StopInput(c *gin.Context) {
 		listener.Stop()
 		input.Enabled = 0
 		settings.Inputs.Update(input)
-	}
 
-	c.Redirect(http.StatusFound, "/inputs")
+		c.JSON(
+			http.StatusOK,
+			gin.H{},
+		)
+	} else {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": err,
+			},
+		)
+	}
 }
 
 // Start input
@@ -64,16 +79,37 @@ func StartInput(c *gin.Context) {
 		listener.Start()
 		input.Enabled = 1
 		settings.Inputs.Update(input)
+		c.JSON(
+			http.StatusOK,
+			gin.H{},
+		)
+	} else {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": err,
+			},
+		)
 	}
-
-	c.Redirect(http.StatusFound, "/inputs")
 }
 
 // Delete input
 func DeleteInput(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	settings.Inputs.Delete(id)
-	c.Redirect(http.StatusFound, "/inputs")
+	err := settings.Inputs.Delete(id)
+	if err == nil {
+		c.JSON(
+			http.StatusOK,
+			gin.H{},
+		)
+	} else {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": err,
+			},
+		)
+	}
 }
 
 // Add input

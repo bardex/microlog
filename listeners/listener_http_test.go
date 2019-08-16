@@ -44,7 +44,6 @@ func TestHttp(t *testing.T) {
 	storage.Clear()
 }
 
-
 // send http data
 func httpSend(msg string, addr string, method string, t *testing.T) {
 	var err error

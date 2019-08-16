@@ -1,12 +1,12 @@
 package listeners
 
 import (
+	"encoding/json"
 	"fmt"
+	"microlog/storage"
 	"net"
 	"testing"
 	"time"
-	"microlog/storage"
-	"encoding/json"
 )
 
 func TestTcp(t *testing.T) {

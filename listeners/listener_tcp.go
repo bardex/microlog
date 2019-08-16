@@ -1,8 +1,8 @@
 package listeners
 
 import (
-	"net"
 	"microlog/storage"
+	"net"
 )
 
 const PROTOCOL_TCP = "tcp"
@@ -54,14 +54,13 @@ func (tcp *tcp) Start() {
 	})()
 }
 
-
 func (tcp *tcp) handleConn(conn net.Conn) {
 	defer func() {
 		conn.Close()
 	}()
 
 	for {
-		input := make([]byte, 4 * 1024)
+		input := make([]byte, 4*1024)
 		n, err := conn.Read(input)
 		if err != nil {
 			tcp.error = err.Error()

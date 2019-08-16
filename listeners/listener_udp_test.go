@@ -1,12 +1,12 @@
 package listeners
 
 import (
+	"encoding/json"
 	"fmt"
+	"microlog/storage"
 	"net"
 	"testing"
 	"time"
-	"microlog/storage"
-	"encoding/json"
 )
 
 func TestUdp(t *testing.T) {
@@ -60,7 +60,6 @@ func TestUdp(t *testing.T) {
 			t.Fatalf("Message '%s' not found", test)
 		}
 	}
-
 
 	udp.Stop()
 
