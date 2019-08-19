@@ -10,13 +10,15 @@ import (
 )
 
 type inputJson struct {
-	Id       int64  `json:"id"`
-	Protocol string `json:"protocol"`
-	Addr     string `json:"addr"`
-	Active   bool   `json:"active"`
-	Error    string `json:"error"`
-	StartUrl string `json:"start_url"`
-	StopUrl  string `json:"stop_url"`
+	Id        int64  `json:"id"`
+	Extractor string `json:"extractor"`
+	Protocol  string `json:"protocol"`
+	Addr      string `json:"addr"`
+	Active    bool   `json:"active"`
+	Error     string `json:"error"`
+	StartUrl  string `json:"start_url"`
+	StopUrl   string `json:"stop_url"`
+	DeleteUrl string `json:"delete_url"`
 }
 
 // All inputs
@@ -28,13 +30,15 @@ func Inputs(c *gin.Context) {
 	for _, input := range inputs {
 		data = append(data,
 			inputJson{
-				Id:       input.Id,
-				Protocol: input.Protocol,
-				Addr:     input.Addr,
-				Active:   input.GetListener().IsActive(),
-				Error:    input.GetListener().GetError(),
-				StartUrl: fmt.Sprintf("/input/start/%d", input.Id),
-				StopUrl:  fmt.Sprintf("/input/stop/%d", input.Id),
+				Id:        input.Id,
+				Protocol:  input.Protocol,
+				Extractor: input.Extractor,
+				Addr:      input.Addr,
+				Active:    input.GetListener().IsActive(),
+				Error:     input.GetListener().GetError(),
+				StartUrl:  fmt.Sprintf("/api/input/start/%d", input.Id),
+				StopUrl:   fmt.Sprintf("/api/input/stop/%d", input.Id),
+				DeleteUrl: fmt.Sprintf("/api/input/delete/%d", input.Id),
 			})
 	}
 
