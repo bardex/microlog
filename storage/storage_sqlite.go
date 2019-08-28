@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -9,53 +10,81 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"encoding/json"
 )
 
-// Entity Field
-type Field struct {
-	Key   string
-	Value string
+type sqlite struct {
+	db *sql.DB
 }
 
-// Entity Message
-type Message struct {
-	MessageId int64
-	Time      string
-	Fields    []Field
+func CreateSqlite(sqlitePath string) (Storage, error) {
+	var err error
+	var stor *sqlite
+	var db *sql.DB
+
+	db, err = sql.Open("sqlite3", "file:"+sqlitePath+"?cache=shared")
+
+	if err == nil {
+		db.SetMaxOpenConns(1)
+
+		_, err = db.Exec("PRAGMA synchronous=NORMAL")
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = db.Exec("PRAGMA journal_mode=WAL")
+		if err != nil {
+			return nil, err
+		}
+
+		stor = &sqlite{db: db}
+	}
+
+	return stor, err
 }
 
-type Storage struct {}
+func (s *sqlite) Write(row map[string]interface{}) error {
+	var err error
 
-func (writer *Storage) Write(row map[string]interface{}) error {
-	data := []byte(fmt.Sprintf("%v", row["msg"]))
+	tx, _ := s.db.Begin()
 
-	fields := make(map[string]interface{})
-	json.Unmarshal(data, &fields)
+	result, err := tx.Exec("INSERT INTO message (id) values (null)")
 
-	tx, _ := db.Begin()
-	err := add(tx, fields)
 	if err != nil {
 		return err
 	}
-	tx.Commit()
 
-	return nil
+	messageId, err := result.LastInsertId()
+
+	if err != nil {
+		return err
+	}
+
+	for key, value := range row {
+		fieldType := getFieldTypeByValueType(getValueType(value))
+		_, err := tx.Exec("INSERT INTO message_fields (k, "+fieldType+", 'timestamp', 'message_id') values ($1, $2, CURRENT_TIMESTAMP, $3)", key, value, messageId)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = tx.Commit()
+
+	return err
 }
 
-func (writer *Storage) Init() {
+func (writer *sqlite) Init() {
 	initDb(false)
 }
 
-func (writer *Storage) Close() {
+func (writer *sqlite) Close() {
 	closeDb()
 }
 
-func (writer *Storage) Clear(ageSec int64) error {
+func (writer *sqlite) Clear(ageSec int64) error {
 	return removeOld(ageSec)
 }
 
-func (writer *Storage) Find(tsStart int32, tsEnd int32, page int32, limit int32, searchFields []Field, selectFields []string) ([]Message, error) {
+func (writer *sqlite) Find(tsStart int32, tsEnd int32, page int32, limit int32, searchFields []Field, selectFields []string) ([]Message, error) {
 	return find(tsStart, tsEnd, page, limit, searchFields, selectFields)
 }
 
@@ -132,35 +161,6 @@ func initDbIndexes() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func add(tx *sql.Tx, fields map[string]interface{}) error {
-	dbErr := openDb()
-	if dbErr != nil {
-		return dbErr
-	}
-
-	result, err := tx.Exec("INSERT INTO message (id) values (null)")
-
-	if err != nil {
-		return err
-	}
-
-	messageId, err := result.LastInsertId()
-
-	if err != nil {
-		return err
-	}
-
-	for key, value := range fields {
-		fieldType := getFieldTypeByValueType(getValueType(value))
-		_, err := tx.Exec("INSERT INTO message_fields (k, "+fieldType+", 'timestamp', 'message_id') values ($1, $2, CURRENT_TIMESTAMP, $3)", key, value, messageId)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func find(tsStart int32, tsEnd int32, page int32, limit int32, searchFields []Field, selectFields []string) ([]Message, error) {
