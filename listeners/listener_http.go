@@ -1,10 +1,10 @@
 package listeners
 
 import (
-	"net"
-	"microlog/storage"
-	net_http "net/http"
 	"io/ioutil"
+	"microlog/storage"
+	"net"
+	net_http "net/http"
 )
 
 const PROTOCOL_HTTP = "http"

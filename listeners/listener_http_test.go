@@ -16,7 +16,7 @@ func TestHttp(t *testing.T) {
 	tests := []string{"test 1", "test 2", "test 3"}
 
 	// http listener
-	storage := storage.StorageStub{}
+	storage := storage.StorageMemory{}
 	extractor, _ := GetExtractor(EXTRACTOR_STRING)
 	http := CreateHttp(addr, extractor, &storage)
 	http.Start()
@@ -43,7 +43,6 @@ func TestHttp(t *testing.T) {
 
 	storage.Clear()
 }
-
 
 // send http data
 func httpSend(msg string, addr string, method string, t *testing.T) {

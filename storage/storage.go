@@ -13,7 +13,11 @@ type Message struct {
 	Fields    []Field
 }
 
+type Row map[string]interface{}
+
+type Rows []Row
+
 type Storage interface {
-	Write(row map[string]interface{}) error
-	Find(filters SearchFilter, page int32, limit int32) ([]Message, error)
+	Write(row Row) error
+	Find(filters SearchFilter, page int32, limit int32) (Rows, error)
 }
