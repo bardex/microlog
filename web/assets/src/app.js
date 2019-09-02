@@ -1,4 +1,4 @@
-import Vue from 'vue/dist/vue.esm.js';
+import Vue from 'vue';
 
 import VueRouter from 'vue-router'
 import InputsList from './inputs-list.vue'
