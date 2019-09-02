@@ -2,12 +2,14 @@ import Vue from 'vue/dist/vue.esm.js';
 
 import VueRouter from 'vue-router'
 import InputsList from './inputs-list.vue'
+import InputAdd from './input-add.vue'
 
 Vue.use(VueRouter);
 
 let router = new VueRouter({
     routes: [
-        {path: '/inputs', component: InputsList}
+        {path: '/inputs', component: InputsList},
+        {path: '/input/add', component: InputAdd}
     ]
 });
 

@@ -2,7 +2,13 @@
     <div>
         <div class="row">
             <div class="col s12 m6">
-                <h4>Inputs <a href="/input/add" class="btn btn-floating  right"><i class="material-icons">add</i></a></h4>
+                <h4>
+                    Inputs
+
+                    <router-link to="/input/add" class="btn btn-floating  right">
+                        <i class="material-icons">add</i>
+                    </router-link>
+                </h4>
             </div>
             
         </div>
