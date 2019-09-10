@@ -12,7 +12,7 @@ type Listener interface {
 
 func CreateListenerByParams(protocol string, addr string, extractor string) Listener {
 	ext, _ := GetExtractor(extractor)
-	stor, _ := storage.CreateStorage()
+	stor, _ := storage.GetStorage()
 
 	switch protocol {
 	case PROTOCOL_UDP:

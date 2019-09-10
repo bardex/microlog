@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"microlog/storage"
 	"net"
+	"sync"
 	"testing"
 	"time"
 )
+
+var wg sync.WaitGroup
 
 func TestTcp(t *testing.T) {
 	addr := ":8080"
@@ -16,53 +19,43 @@ func TestTcp(t *testing.T) {
 		`{"facility":"abc2", "level":1, "percents":12.5, "date":"2018-11-21"}`,
 		`{"facility":"abc3", "level":1, "percents":13.5, "date":"2018-12-23"}`,
 	}
-	stor := storage.Storage{}
-	stor.Init()
-	defer stor.Close()
 
-	extractor, _ := GetExtractor(EXTRACTOR_STRING)
-	tcp := CreateTcp(addr, extractor, &stor)
+	tcp := CreateListenerByParams("tcp", addr, EXTRACTOR_JSON)
 	tcp.Start()
 
 	time.Sleep(2 * time.Second)
 
 	for _, test := range tests {
+		wg.Add(1)
 		go tcpSend(test, addr, t)
 	}
 
-	time.Sleep(1 * time.Second)
+	wg.Wait()
 
-	for _, test := range tests {
-		data := []byte(test)
+	s, _ := storage.GetStorage()
 
-		fields := make(map[string]interface{})
-		json.Unmarshal(data, &fields)
+	qb := storage.QueryBuilder{}
 
-		searchFields := []storage.Field{}
-
-		for key, value := range fields {
-			searchFields = append(searchFields, storage.Field{
-				Key:   fmt.Sprintf("%v", key),
-				Value: fmt.Sprintf("%v", value),
-			})
-		}
-
-		messages, err := stor.Find(0, 2000000000, 1, 100, searchFields, []string{})
+	for _, str := range tests {
+		test := storage.Row{}
+		json.Unmarshal([]byte(str), &test)
+		facility := fmt.Sprintf("%v", test["facility"])
+		result, err := s.Find(qb.Equal("facility", facility), 1, 10)
 
 		if err != nil {
-			t.Fatal(err.Error())
+			t.Fatal(err)
 		}
 
-		if len(messages) == 0 {
-			t.Fatalf("Message '%s' not found", test)
+		if len(result) != 1 {
+			t.Fatalf("Expected len:1, actual:%d", len(result))
+		}
+
+		if result[0]["facility"] != facility {
+			t.Fatalf("Expected facility:%s, actual:%s", facility, result[0]["facility"])
 		}
 	}
 
 	tcp.Stop()
-
-	//stor.Clear(0)
-
-	time.Sleep(1 * time.Second)
 
 	conn, err := net.Dial("tcp", addr)
 
@@ -84,4 +77,6 @@ func tcpSend(msg string, addr string, t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
+
+	wg.Done()
 }

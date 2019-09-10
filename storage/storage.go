@@ -29,7 +29,7 @@ type Storage interface {
 	Find(filters Query, page int32, limit int32) (Rows, error)
 }
 
-func CreateStorage() (Storage, error) {
+func GetStorage() (Storage, error) {
 	once.Do(func() {
 		storage = &StorageMemory{}
 	})
