@@ -62,5 +62,6 @@ func (w *StorageMemory) Init() error {
 }
 
 func (w *StorageMemory) Close() error {
+	w.buffer = make(Rows, 0, 10)
 	return nil
 }

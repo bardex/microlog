@@ -5,6 +5,7 @@ import (
 	"microlog/storage"
 	"net"
 	net_http "net/http"
+	"strings"
 )
 
 const PROTOCOL_HTTP = "http"
@@ -30,9 +31,7 @@ func CreateHttp(addr string, extractor Extractor, storage storage.Storage) Liste
 // start listen
 func (http *http) Start() {
 	go (func() {
-
-		net_http.HandleFunc("/", http.handleConn)
-		err := net_http.ListenAndServe(http.addr, nil)
+		err := net_http.ListenAndServe(http.addr, http)
 
 		if err != nil {
 			http.error = err.Error()
@@ -44,8 +43,8 @@ func (http *http) Start() {
 	})()
 }
 
-func (http *http) handleConn(w net_http.ResponseWriter, r *net_http.Request) {
-	if r.Method == "POST" {
+func (http *http) ServeHTTP(w net_http.ResponseWriter, r *net_http.Request) {
+	if strings.ToUpper(r.Method) == "POST" {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			http.error = err.Error()
