@@ -5,23 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"runtime"
 	"testing"
-	"time"
 )
 
 var testfile string = "logs"
-
-func init() {
-	go func() {
-		m := &runtime.MemStats{}
-		c := time.Tick(time.Second * 1)
-		for t := range c {
-			runtime.ReadMemStats(m)
-			fmt.Printf("Alloc:%d Stack:%d [%d]\n", m.TotalAlloc, m.StackInuse, t.Unix())
-		}
-	}()
-}
 
 func createTestFile() {
 	if _, err := os.Stat(testfile); os.IsNotExist(err) {
