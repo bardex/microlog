@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"microlog/listeners"
 	"microlog/settings"
@@ -8,17 +9,42 @@ import (
 	"strconv"
 )
 
+type inputJson struct {
+	Id        int64  `json:"id"`
+	Extractor string `json:"extractor"`
+	Protocol  string `json:"protocol"`
+	Addr      string `json:"addr"`
+	Active    bool   `json:"active"`
+	Error     string `json:"error"`
+	StartUrl  string `json:"start_url"`
+	StopUrl   string `json:"stop_url"`
+	DeleteUrl string `json:"delete_url"`
+}
+
 // All inputs
 func Inputs(c *gin.Context) {
 	inputs, _ := settings.Inputs.GetAll()
 
-	c.HTML(
+	data := make([]inputJson, 0, len(inputs))
+
+	for _, input := range inputs {
+		data = append(data,
+			inputJson{
+				Id:        input.Id,
+				Protocol:  input.Protocol,
+				Extractor: input.Extractor,
+				Addr:      input.Addr,
+				Active:    input.GetListener().IsActive(),
+				Error:     input.GetListener().GetError(),
+				StartUrl:  fmt.Sprintf("/api/input/start/%d", input.Id),
+				StopUrl:   fmt.Sprintf("/api/input/stop/%d", input.Id),
+				DeleteUrl: fmt.Sprintf("/api/input/delete/%d", input.Id),
+			})
+	}
+
+	c.JSON(
 		http.StatusOK,
-		"inputs.html",
-		gin.H{
-			"title":  "Inputs",
-			"inputs": inputs,
-		},
+		data,
 	)
 }
 
@@ -32,9 +58,19 @@ func StopInput(c *gin.Context) {
 		listener.Stop()
 		input.Enabled = 0
 		settings.Inputs.Update(input)
-	}
 
-	c.Redirect(http.StatusFound, "/inputs")
+		c.JSON(
+			http.StatusOK,
+			gin.H{},
+		)
+	} else {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": err,
+			},
+		)
+	}
 }
 
 // Start input
@@ -47,16 +83,37 @@ func StartInput(c *gin.Context) {
 		listener.Start()
 		input.Enabled = 1
 		settings.Inputs.Update(input)
+		c.JSON(
+			http.StatusOK,
+			gin.H{},
+		)
+	} else {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": err,
+			},
+		)
 	}
-
-	c.Redirect(http.StatusFound, "/inputs")
 }
 
 // Delete input
 func DeleteInput(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	settings.Inputs.Delete(id)
-	c.Redirect(http.StatusFound, "/inputs")
+	err := settings.Inputs.Delete(id)
+	if err == nil {
+		c.JSON(
+			http.StatusOK,
+			gin.H{},
+		)
+	} else {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": err,
+			},
+		)
+	}
 }
 
 // Add input

@@ -31,15 +31,16 @@ func CreateHttp(addr string, extractor Extractor, storage storage.Storage) Liste
 // start listen
 func (http *http) Start() {
 	go (func() {
+		http.active = true
+		http.error = ""
+
 		err := net_http.ListenAndServe(http.addr, http)
 
 		if err != nil {
 			http.error = err.Error()
+			http.active = false
 			return
 		}
-
-		http.active = true
-		http.error = ""
 	})()
 }
 

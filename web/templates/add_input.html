@@ -1,5 +1,3 @@
-{{ template "header.html" .}}
-
 
 <h1>Add input</h1>
 
@@ -9,15 +7,16 @@
             <select class="form-control" name="protocol">
                 <option value="udp">UDP</option>
                 <option value="tcp">TCP</option>
+                <option value="http">HTTP</option>
             </select>
         </div>
         <div class="col-sm-2 my-1">
             <select class="form-control" name="extractor">
-                {{with .extractors }}
-                {{range . }}
-                    <option value="{{ .GetName }}">{{ .GetDescription }}</option>
-                {{end}}
-                {{end}}
+                [[with .extractors ]]
+                [[range . ]]
+                    <option value="[[ .GetName ]]">[[ .GetDescription ]]</option>
+                [[end]]
+                [[end]]
             </select>
         </div>
         <div class="col-sm-2 my-1">
@@ -28,6 +27,3 @@
         </div>
     </div>
 </form>
-
-
-{{ template "footer.html" .}}

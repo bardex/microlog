@@ -1,4 +1,4 @@
-{{ template "header.html" .}}
+[[ template "header.html" .]]
 
 
 <h1 class="float-left">Inputs</h1>
@@ -17,49 +17,49 @@
     </tr>
     </thead>
     <tbody>
-    {{with .inputs }}
-    {{range . }}
+    [[with .inputs ]]
+    [[range . ]]
     <tr>
-        <td>{{ .Id }}</td>
-        <td>{{ .Protocol }} / {{ .Extractor }}</td>
-        <td>{{ .Addr }}</td>
+        <td>[[ .Id ]]</td>
+        <td>[[ .Protocol ]] / [[ .Extractor ]]</td>
+        <td>[[ .Addr ]]</td>
         <td>
-            {{if .GetListener.IsActive }}
+            [[if .GetListener.IsActive ]]
                 <span class="badge badge-pill badge-success">Active</span>
-            {{else}}
+            [[else]]
                 <span class="badge badge-pill badge-secondary">Inactive</span>
-            {{end}}
+            [[end]]
         </td>
         <td>
-            {{if .GetListener.GetError }}
+            [[if .GetListener.GetError ]]
                 <div class="alert alert-danger" role="alert">
-                    {{ .GetListener.GetError }}
+                    [[ .GetListener.GetError ]]
                 </div>
-            {{end}}
+            [[end]]
         </td>
         <td class="row">
-            {{ if .GetListener.IsActive }}
+            [[ if .GetListener.IsActive ]]
                 <div class="col-2">
-                    <form action="/input/stop/{{ .Id }}" method="post">
+                    <form action="/input/stop/[[ .Id ]]" method="post">
                         <input type="submit" class="btn btn-danger btn-sm" value="Stop">
                     </form>
                 </div>
-            {{ else }}
+            [[ else ]]
                 <div class="col-2">
-                    <form action="/input/start/{{ .Id }}" method="post">
+                    <form action="/input/start/[[ .Id ]]" method="post">
                         <input type="submit" class="btn btn-success btn-sm" value="Start">
                     </form>
                 </div>
                 <div class="col-2">
-                    <form action="/input/delete/{{ .Id }}" method="post">
+                    <form action="/input/delete/[[ .Id ]]" method="post">
                         <input type="submit" class="btn btn-danger btn-sm" value="Delete">
                     </form>
                 </div>
-            {{ end}}
+            [[ end]]
         </td>
     </tr>
-    {{end}}
-    {{end}}
+    [[end]]
+    [[end]]
 
     </tbody>
 </table>
@@ -67,4 +67,4 @@
 <br>
 <a class="btn btn-success" href="/input/add">Add</a>
 
-{{ template "footer.html" .}}
+[[ template "footer.html" .]]
