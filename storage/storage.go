@@ -5,28 +5,15 @@ import "sync"
 var once sync.Once
 var storage Storage
 
-// Entity Field
-type Field struct {
-	Key   string
-	Value string
-}
+type Message map[string]interface{}
 
-// Entity Message
-type Message struct {
-	MessageId int64
-	Time      string
-	Fields    []Field
-}
-
-type Row map[string]interface{}
-
-type Rows []Row
+type Messages []Message
 
 type Storage interface {
 	Init() error
 	Close() error
-	Write(row Row) error
-	Find(filters Query, page int32, limit int32) (Rows, error)
+	Write(row Message) error
+	Find(filters Query, page int32, limit int32) (Messages, error)
 }
 
 func GetStorage() (Storage, error) {

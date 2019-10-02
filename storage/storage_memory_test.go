@@ -7,7 +7,7 @@ import (
 func TestStorageMemoryPaginator(t *testing.T) {
 	s := StorageMemory{}
 	for i := 0; i < 10; i++ {
-		s.Write(Row{"id": i + 1})
+		s.Write(Message{"id": i + 1})
 	}
 
 	{
@@ -68,17 +68,17 @@ func TestStorageMemoryPaginator(t *testing.T) {
 
 func TestStorageMemoryFind(t *testing.T) {
 	s := StorageMemory{}
-	s.Write(Row{"id": 1, "status": 0})
-	s.Write(Row{"id": 2, "status": 1})
-	s.Write(Row{"id": 3, "status": 0})
-	s.Write(Row{"id": 4, "status": 1})
-	s.Write(Row{"id": 5, "status": 0}) //valid
-	s.Write(Row{"id": 6, "status": 1})
-	s.Write(Row{"id": 7, "status": 0}) //valid
-	s.Write(Row{"id": 8, "status": 1})
-	s.Write(Row{"id": 9, "status": 0}) //valid
-	s.Write(Row{"id": 10, "status": 1})
-	s.Write(Row{"id": 11, "status": 0, "time": "2019"})
+	s.Write(Message{"id": 1, "status": 0})
+	s.Write(Message{"id": 2, "status": 1})
+	s.Write(Message{"id": 3, "status": 0})
+	s.Write(Message{"id": 4, "status": 1})
+	s.Write(Message{"id": 5, "status": 0}) //valid
+	s.Write(Message{"id": 6, "status": 1})
+	s.Write(Message{"id": 7, "status": 0}) //valid
+	s.Write(Message{"id": 8, "status": 1})
+	s.Write(Message{"id": 9, "status": 0}) //valid
+	s.Write(Message{"id": 10, "status": 1})
+	s.Write(Message{"id": 11, "status": 0, "time": "2019"})
 
 	qb := QueryBuilder{}
 	q := qb.And(qb.Equal("status", "0"), qb.GreaterOrEqual("id", "5"), qb.NotExists("time"))

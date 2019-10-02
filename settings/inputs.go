@@ -14,7 +14,7 @@ type Input struct {
 
 func (input *Input) GetListener() listeners.Listener {
 	if input.listener == nil {
-		input.listener = listeners.CreateListenerByParams(input.Protocol, input.Addr, input.Extractor)
+		input.listener = listeners.NewListenerByParams(input.Protocol, input.Addr, input.Extractor)
 	}
 	return input.listener
 }

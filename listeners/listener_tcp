@@ -8,21 +8,7 @@ import (
 const PROTOCOL_TCP = "tcp"
 
 type tcp struct {
-	addr      string
-	error     string
-	active    bool
-	conn      net.Listener
-	extractor Extractor
-	storage   storage.Storage
-}
-
-func CreateTcp(addr string, extractor Extractor, storage storage.Storage) Listener {
-	return &tcp{
-		addr:      addr,
-		active:    false,
-		extractor: extractor,
-		storage:   storage,
-	}
+	conn net.Listener
 }
 
 // start listen
@@ -87,16 +73,4 @@ func (tcp *tcp) Stop() {
 	}
 	tcp.active = false
 	tcp.conn = nil
-}
-
-func (tcp *tcp) IsActive() bool {
-	return tcp.active
-}
-
-func (tcp *tcp) GetError() string {
-	return tcp.error
-}
-
-func (tcp *tcp) GetAddr() string {
-	return tcp.addr
 }

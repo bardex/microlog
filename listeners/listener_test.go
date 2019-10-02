@@ -11,20 +11,24 @@ import (
 	"time"
 )
 
+/*
 func TestTcp(t *testing.T) {
 	testListener("tcp", ":8091", t)
 }
+*/
 
 func TestUdp(t *testing.T) {
-	testListener("udp", ":8092", t)
+	testListener(ProtocolUdp, ":8092", t)
 }
 
+/*
 func TestHttp(t *testing.T) {
 	testListener("http", ":8093", t)
 }
+*/
 
 func testListener(protocol string, addr string, t *testing.T) {
-	listener := CreateListenerByParams(protocol, addr, EXTRACTOR_JSON)
+	listener := NewListenerByParams(protocol, addr, ExtractorJson)
 	listener.Start()
 	defer listener.Stop()
 	time.Sleep(2 * time.Second) // wait start
@@ -73,7 +77,7 @@ func testListener(protocol string, addr string, t *testing.T) {
 	qb := storage.QueryBuilder{}
 
 	for _, str := range tests {
-		test := storage.Row{}
+		test := storage.Message{}
 		json.Unmarshal([]byte(str), &test)
 		facility := fmt.Sprintf("%v", test["facility"])
 		result, err := s.Find(qb.Equal("facility", facility), 1, 10)

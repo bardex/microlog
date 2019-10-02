@@ -8,7 +8,7 @@ import (
 
 type Filter struct{}
 
-func (i *Filter) Test(q Query, row Row) (bool, error) {
+func (i *Filter) Test(q Query, row Message) (bool, error) {
 	if q.Operator == "" {
 		return true, nil
 	}

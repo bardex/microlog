@@ -1,27 +1,53 @@
 package listeners
 
-import "microlog/storage"
+import (
+	"microlog/storage"
+)
 
-type Listener interface {
-	Start()
-	Stop()
-	IsActive() bool
-	GetAddr() string
-	GetError() string
+type Handler interface {
+	Listen(*Listener) error
+	Close()
 }
 
-func CreateListenerByParams(protocol string, addr string, extractor string) Listener {
-	ext, _ := GetExtractor(extractor)
-	stor, _ := storage.GetStorage()
+type Listener struct {
+	Protocol  string
+	Addr      string
+	Error     string
+	Active    bool
+	Handler   Handler
+	Extractor Extractor
+	Storage   storage.Storage
+}
+
+func (l *Listener) Start() {
+	go func() {
+		err := l.Handler.Listen(l)
+
+		if err != nil {
+			l.Active = false
+			l.Error = err.Error()
+			return
+		}
+
+	}()
+}
+
+func (l *Listener) Stop() {
+	l.Handler.Close()
+}
+
+func NewListenerByParams(protocol string, addr string, extractor string) Listener {
+	listener := Listener{}
+
+	listener.Protocol = protocol
+	listener.Addr = addr
+	listener.Storage, _ = storage.GetStorage()
+	listener.Extractor, _ = GetExtractor(extractor)
 
 	switch protocol {
-	case PROTOCOL_UDP:
-		return CreateUdp(addr, ext, stor)
-	case PROTOCOL_TCP:
-		return CreateTcp(addr, ext, stor)
-	case PROTOCOL_HTTP:
-		return CreateHttp(addr, ext, stor)
+	case ProtocolUdp:
+		listener.Handler = &UDPHandler{}
 	}
 
-	return nil
+	return listener
 }

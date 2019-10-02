@@ -36,7 +36,7 @@ func TestSearchByFile(b *testing.T) {
 		builder.Less("id", "10.5"),
 	)
 
-	var results []Row
+	var results []Message
 
 	// фильтр
 	filter := Filter{}
@@ -50,7 +50,7 @@ func TestSearchByFile(b *testing.T) {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		var row Row
+		var row Message
 		err := json.Unmarshal(scanner.Bytes(), &row)
 
 		if err != nil {

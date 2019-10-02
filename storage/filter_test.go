@@ -9,7 +9,7 @@ func TestFilter(t *testing.T) {
 	var b QueryBuilder
 	var filter Filter
 
-	tester := func(q Query, rtrue Row, rfalse Row) {
+	tester := func(q Query, rtrue Message, rfalse Message) {
 		yes, err := filter.Test(q, rtrue)
 		if err != nil {
 			t.Fatal(err)
@@ -27,55 +27,55 @@ func TestFilter(t *testing.T) {
 	}
 
 	// tester(query, true row, false row)
-	tester(b.Exists("id"), Row{"id": 20}, Row{"level": 1})
-	tester(b.NotExists("id"), Row{"level": 20}, Row{"id": 1})
+	tester(b.Exists("id"), Message{"id": 20}, Message{"level": 1})
+	tester(b.NotExists("id"), Message{"level": 20}, Message{"id": 1})
 
-	tester(b.Equal("id", "10"), Row{"id": 10}, Row{"id": 20})
-	tester(b.Equal("id", "10"), Row{"id": "10"}, Row{"id": "20"})
-	tester(b.Equal("id", "10"), Row{"id": "10"}, Row{"level": "20"})
+	tester(b.Equal("id", "10"), Message{"id": 10}, Message{"id": 20})
+	tester(b.Equal("id", "10"), Message{"id": "10"}, Message{"id": "20"})
+	tester(b.Equal("id", "10"), Message{"id": "10"}, Message{"level": "20"})
 
-	tester(b.Like("login", "admin"), Row{"login": "_t_admin_10"}, Row{"login": "adm"})
-	tester(b.Like("login", "admin"), Row{"login": "_t_admin_10"}, Row{"name": "admin"})
-	tester(b.Like("login", "admin"), Row{"login": "_t_admin_10"}, Row{"login": "Admin"})
+	tester(b.Like("login", "admin"), Message{"login": "_t_admin_10"}, Message{"login": "adm"})
+	tester(b.Like("login", "admin"), Message{"login": "_t_admin_10"}, Message{"name": "admin"})
+	tester(b.Like("login", "admin"), Message{"login": "_t_admin_10"}, Message{"login": "Admin"})
 
-	tester(b.NotEqual("id", "10"), Row{"id": 20}, Row{"id": 10})
-	tester(b.NotEqual("id", "10"), Row{"id": "20"}, Row{"id": "10"})
-	tester(b.NotEqual("id", "10"), Row{"level": "10"}, Row{"id": "10"})
+	tester(b.NotEqual("id", "10"), Message{"id": 20}, Message{"id": 10})
+	tester(b.NotEqual("id", "10"), Message{"id": "20"}, Message{"id": "10"})
+	tester(b.NotEqual("id", "10"), Message{"level": "10"}, Message{"id": "10"})
 
-	tester(b.Less("id", "10"), Row{"id": 9}, Row{"id": 11})
-	tester(b.Less("id", "10"), Row{"id": "9"}, Row{"id": "11"})
-	tester(b.Less("id", "10"), Row{"id": "9.5"}, Row{"id": "10.5"})
-	tester(b.Less("id", "10"), Row{"id": 9.5}, Row{"id": 10.5})
-	tester(b.Less("id", "10"), Row{"id": 9.5}, Row{"level": 10.5})
+	tester(b.Less("id", "10"), Message{"id": 9}, Message{"id": 11})
+	tester(b.Less("id", "10"), Message{"id": "9"}, Message{"id": "11"})
+	tester(b.Less("id", "10"), Message{"id": "9.5"}, Message{"id": "10.5"})
+	tester(b.Less("id", "10"), Message{"id": 9.5}, Message{"id": 10.5})
+	tester(b.Less("id", "10"), Message{"id": 9.5}, Message{"level": 10.5})
 
-	tester(b.LessOrEqual("id", "10"), Row{"id": 9}, Row{"id": 11})
-	tester(b.LessOrEqual("id", "10"), Row{"id": "10"}, Row{"id": "11"})
-	tester(b.LessOrEqual("id", "10"), Row{"id": "9.5"}, Row{"id": "10.5"})
-	tester(b.LessOrEqual("id", "10"), Row{"id": 10}, Row{"id": 10.5})
-	tester(b.LessOrEqual("id", "10"), Row{"id": 10}, Row{"level": 10.5})
+	tester(b.LessOrEqual("id", "10"), Message{"id": 9}, Message{"id": 11})
+	tester(b.LessOrEqual("id", "10"), Message{"id": "10"}, Message{"id": "11"})
+	tester(b.LessOrEqual("id", "10"), Message{"id": "9.5"}, Message{"id": "10.5"})
+	tester(b.LessOrEqual("id", "10"), Message{"id": 10}, Message{"id": 10.5})
+	tester(b.LessOrEqual("id", "10"), Message{"id": 10}, Message{"level": 10.5})
 
-	tester(b.Greater("id", "10"), Row{"id": 11}, Row{"id": 9})
-	tester(b.Greater("id", "10"), Row{"id": "11"}, Row{"id": "9"})
-	tester(b.Greater("id", "10"), Row{"id": "10.5"}, Row{"id": "9.5"})
-	tester(b.Greater("id", "10"), Row{"id": 10.5}, Row{"id": 9.5})
-	tester(b.Greater("id", "10"), Row{"id": 10.5}, Row{"level": 9.5})
+	tester(b.Greater("id", "10"), Message{"id": 11}, Message{"id": 9})
+	tester(b.Greater("id", "10"), Message{"id": "11"}, Message{"id": "9"})
+	tester(b.Greater("id", "10"), Message{"id": "10.5"}, Message{"id": "9.5"})
+	tester(b.Greater("id", "10"), Message{"id": 10.5}, Message{"id": 9.5})
+	tester(b.Greater("id", "10"), Message{"id": 10.5}, Message{"level": 9.5})
 
-	tester(b.GreaterOrEqual("id", "11"), Row{"id": 11}, Row{"id": 9})
-	tester(b.GreaterOrEqual("id", "11"), Row{"id": "11.5"}, Row{"id": "10.5"})
-	tester(b.GreaterOrEqual("id", "10.5"), Row{"id": "10.5"}, Row{"id": 9.5})
-	tester(b.GreaterOrEqual("id", "10.5"), Row{"id": 10.5}, Row{"id": "9.4"})
-	tester(b.GreaterOrEqual("id", "10.5"), Row{"id": 10.5}, Row{"level": "9.4"})
+	tester(b.GreaterOrEqual("id", "11"), Message{"id": 11}, Message{"id": 9})
+	tester(b.GreaterOrEqual("id", "11"), Message{"id": "11.5"}, Message{"id": "10.5"})
+	tester(b.GreaterOrEqual("id", "10.5"), Message{"id": "10.5"}, Message{"id": 9.5})
+	tester(b.GreaterOrEqual("id", "10.5"), Message{"id": 10.5}, Message{"id": "9.4"})
+	tester(b.GreaterOrEqual("id", "10.5"), Message{"id": 10.5}, Message{"level": "9.4"})
 
 	tester(
 		b.Or(b.Equal("id", "10"), b.Equal("status", "0")),
-		Row{"id": "10"},
-		Row{"status": 1},
+		Message{"id": "10"},
+		Message{"status": 1},
 	)
 
 	tester(
 		b.And(b.Equal("id", "10"), b.Equal("status", "0")),
-		Row{"id": 10, "status": "0"},
-		Row{"id": 10, "status": 1},
+		Message{"id": 10, "status": "0"},
+		Message{"id": 10, "status": 1},
 	)
 
 }
@@ -155,7 +155,7 @@ func TestEqualBench(b *testing.T) {
 	count := 10000000
 
 	for i := 0; i < count; i++ {
-		row := Row{"id": i}
+		row := Message{"id": i}
 		f.Test(q, row)
 	}
 

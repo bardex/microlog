@@ -1,93 +1,62 @@
 package listeners
 
 import (
-	"microlog/storage"
 	"net"
 )
 
-const PROTOCOL_UDP = "udp"
+const ProtocolUdp = "udp"
 
-type udp struct {
-	addr      string
-	error     string
-	active    bool
-	conn      *net.UDPConn
-	extractor Extractor
-	storage   storage.Storage
+type UDPHandler struct {
+	conn *net.UDPConn
 }
 
-func CreateUdp(addr string, extractor Extractor, storage storage.Storage) Listener {
-	return &udp{
-		addr:      addr,
-		active:    false,
-		extractor: extractor,
-		storage:   storage,
-	}
-}
+// check interface
+var _ Handler = (*UDPHandler)(nil)
 
 // start listen
-func (udp *udp) Start() {
-	go (func() {
-		ServerAddr, err := net.ResolveUDPAddr("udp", udp.addr)
+func (udp *UDPHandler) Listen(listener *Listener) error {
+
+	ServerAddr, err := net.ResolveUDPAddr("udp", listener.Addr)
+
+	if err != nil {
+		return err
+	}
+
+	ServerConn, err := net.ListenUDP("udp", ServerAddr)
+
+	if err != nil {
+		return err
+	}
+
+	udp.conn = ServerConn
+	defer udp.Close()
+
+	buf := make([]byte, 4*1024)
+
+	for {
+		n, addr, err := ServerConn.ReadFromUDP(buf)
 
 		if err != nil {
-			udp.error = err.Error()
-			return
+			listener.Error = err.Error()
+			continue
 		}
 
-		ServerConn, err := net.ListenUDP("udp", ServerAddr)
+		row, err := listener.Extractor.Extract(buf[:n])
+		row["remote_addr"] = addr.String()
 
-		if err != nil {
-			udp.error = err.Error()
-			return
+		if err == nil {
+			listener.Storage.Write(row)
+		} else {
+			listener.Error = err.Error()
 		}
+	}
 
-		udp.conn = ServerConn
-		udp.active = true
-		udp.error = ""
-
-		defer udp.Stop()
-
-		buf := make([]byte, 4*1024)
-
-		for {
-			n, addr, err := ServerConn.ReadFromUDP(buf)
-
-			if err != nil {
-				udp.error = err.Error()
-				break
-			}
-			row, err := udp.extractor.Extract(buf[:n])
-			row["remote_addr"] = addr.String()
-
-			if err == nil {
-				udp.storage.Write(row)
-			} else {
-				udp.error = err.Error()
-			}
-		}
-	})()
 }
 
 // stop listen
-func (udp *udp) Stop() {
-	if udp.active {
-		if udp.conn != nil {
-			_ = udp.conn.Close()
-		}
+func (udp *UDPHandler) Close() {
+	if udp.conn != nil {
+		_ = udp.conn.Close()
 	}
-	udp.active = false
 	udp.conn = nil
-}
-
-func (udp *udp) IsActive() bool {
-	return udp.active
-}
-
-func (udp *udp) GetError() string {
-	return udp.error
-}
-
-func (udp *udp) GetAddr() string {
-	return udp.addr
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func TestStringExtract(t *testing.T) {
-	extractor, err := GetExtractor(EXTRACTOR_STRING)
+	extractor, err := GetExtractor(ExtractorString)
 
 	if err != nil {
 		t.Fatal(err)
@@ -28,7 +28,7 @@ func TestStringExtract(t *testing.T) {
 }
 
 func TestJsonExtract(t *testing.T) {
-	extractor, err := GetExtractor(EXTRACTOR_JSON)
+	extractor, err := GetExtractor(ExtractorJson)
 
 	if err != nil {
 		t.Fatal(err)
@@ -59,7 +59,7 @@ func TestJsonExtract(t *testing.T) {
 }
 
 func TestZlibJsonExtract(t *testing.T) {
-	extractor, err := GetExtractor(EXTRACTOR_ZLIB_JSON)
+	extractor, err := GetExtractor(ExtractorZlibJson)
 
 	if err != nil {
 		t.Fatal(err)
@@ -78,7 +78,7 @@ func TestZlibJsonExtract(t *testing.T) {
 	w.Write(data)
 	w.Close()
 
-	data = []byte(b.String())
+	data = b.Bytes()
 
 	out, err := extractor.Extract(data)
 

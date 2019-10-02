@@ -6,32 +6,32 @@ import (
 )
 
 type StorageMemory struct {
-	buffer Rows
+	buffer Messages
 }
 
 // check interface
 var _ Storage = (*StorageMemory)(nil)
 
-func (w *StorageMemory) Write(row Row) error {
+func (w *StorageMemory) Write(row Message) error {
 	w.buffer = append(w.buffer, row)
 	return nil
 }
 
 func (w *StorageMemory) Clear() {
-	w.buffer = make(Rows, 0, 10)
+	w.buffer = make(Messages, 0, 10)
 }
 
-func (w *StorageMemory) Find(query Query, page int32, limit int32) (Rows, error) {
+func (w *StorageMemory) Find(query Query, page int32, limit int32) (Messages, error) {
 	if page <= 0 {
-		return Rows{}, errors.New("Param `page` must be greater 0")
+		return Messages{}, errors.New("Param `page` must be greater 0")
 	}
 
 	if limit <= 0 {
-		return Rows{}, errors.New("Param `limit` must be greater 0")
+		return Messages{}, errors.New("Param `limit` must be greater 0")
 	}
 
 	filter := Filter{}
-	results := make(Rows, 0, limit)
+	results := make(Messages, 0, limit)
 	offset := (page - 1) * limit
 	counter := int32(0)
 
@@ -62,6 +62,6 @@ func (w *StorageMemory) Init() error {
 }
 
 func (w *StorageMemory) Close() error {
-	w.buffer = make(Rows, 0, 10)
+	w.buffer = make(Messages, 0, 10)
 	return nil
 }
