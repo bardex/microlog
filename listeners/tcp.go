@@ -1,7 +1,6 @@
 package listeners
 
 import (
-	"microlog/storage"
 	"net"
 )
 
@@ -21,7 +20,7 @@ func (tcp *TCPHandler) Listen(listener *Listener) error {
 
 	tcp.conn = TCPConn
 
-	defer tcp.Stop()
+	defer tcp.Close()
 
 	for {
 		conn, err := TCPConn.Accept()
@@ -51,15 +50,15 @@ func (tcp *TCPHandler) handleConn(conn net.Conn, listener *Listener) {
 		row["remote_addr"] = conn.RemoteAddr().String()
 
 		if err == nil {
-			tcp.storage.Write(row)
+			listener.Storage.Write(row)
 		} else {
-			tcp.error = err.Error()
+			listener.Error = err.Error()
 		}
 	}
 }
 
 // stop listen
-func (tcp *TCPHandler) Stop() {
+func (tcp *TCPHandler) Close() {
 
 	if tcp.conn != nil {
 		_ = tcp.conn.Close()

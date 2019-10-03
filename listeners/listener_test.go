@@ -11,21 +11,17 @@ import (
 	"time"
 )
 
-/*
 func TestTcp(t *testing.T) {
-	testListener("tcp", ":8091", t)
+	testListener(ProtocolTcp, ":8091", t)
 }
-*/
 
 func TestUdp(t *testing.T) {
 	testListener(ProtocolUdp, ":8092", t)
 }
 
-/*
 func TestHttp(t *testing.T) {
 	testListener("http", ":8093", t)
 }
-*/
 
 func testListener(protocol string, addr string, t *testing.T) {
 	listener := NewListenerByParams(protocol, addr, ExtractorJson)

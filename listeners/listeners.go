@@ -10,6 +10,7 @@ type Handler interface {
 }
 
 type Listener struct {
+	Id        int64
 	Protocol  string
 	Addr      string
 	Error     string
@@ -36,8 +37,8 @@ func (l *Listener) Stop() {
 	l.Handler.Close()
 }
 
-func NewListenerByParams(protocol string, addr string, extractor string) Listener {
-	listener := Listener{}
+func NewListenerByParams(protocol string, addr string, extractor string) *Listener {
+	listener := &Listener{}
 
 	listener.Protocol = protocol
 	listener.Addr = addr
@@ -47,7 +48,10 @@ func NewListenerByParams(protocol string, addr string, extractor string) Listene
 	switch protocol {
 	case ProtocolUdp:
 		listener.Handler = &UDPHandler{}
-	case PROTOCOL_TCP:
+	case ProtocolTcp:
+		listener.Handler = &TCPHandler{}
+	case ProtocolHttp:
+		listener.Handler = &HTTPHandler{}
 	}
 
 	return listener
