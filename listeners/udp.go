@@ -10,9 +10,6 @@ type UDPHandler struct {
 	conn *net.UDPConn
 }
 
-// check interface
-var _ Handler = (*UDPHandler)(nil)
-
 // start listen
 func (udp *UDPHandler) Listen(listener *Listener) error {
 

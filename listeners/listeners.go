@@ -47,6 +47,7 @@ func NewListenerByParams(protocol string, addr string, extractor string) Listene
 	switch protocol {
 	case ProtocolUdp:
 		listener.Handler = &UDPHandler{}
+	case PROTOCOL_TCP:
 	}
 
 	return listener
