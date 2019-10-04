@@ -2,13 +2,12 @@ package listeners
 
 import (
 	"database/sql"
-	"microlog/storage"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Repository struct {
 	db         *sql.DB
 	inMemory   []*Listener
-	logStorage storage.Storage
 }
 
 func (r *Repository) Init() error {
@@ -33,7 +32,9 @@ func (r *Repository) Close() error {
 }
 
 func (r *Repository) Add(listener *Listener) error {
-	id := int64(1)
+	args := sqlite3.NamedArgs{"$a": 1, "$b": "demo"}
+	c.Exec("INSERT INTO x VALUES($a, $b, $c)", args) // $c will be NULL
+
 
 	listener.Id = id
 
@@ -54,10 +55,24 @@ func (r *Repository) FindAll() ([]*Listener, error) {
 	return r.inMemory, nil
 }
 
-func NewRepository(db *sql.DB, logStorage storage.Storage) (*Repository, error) {
+func (r *Repository) Find(id int64) (*Listener, error) {
+	all, err := r.FindAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, l := range all {
+		if l.Id == id {
+			return l, nil
+		}
+	}
+
+	return nil, nil
+}
+
+func NewRepository(db *sql.DB) (*Repository, error) {
 	repo := &Repository{
 		db:         db,
-		logStorage: logStorage,
 	}
 	repo.Init()
 	return repo, nil
