@@ -15,9 +15,14 @@ const ExtractorZlibJson = "ZLIB_JSON"
 
 type Extractor interface {
 	Extract([]byte) (storage.Message, error)
+	Name() string
 }
 
 type JsonExtractor struct{}
+
+func (e JsonExtractor) Name() string {
+	return ExtractorJson
+}
 
 func (e JsonExtractor) Extract(buf []byte) (storage.Message, error) {
 	msg := make(map[string]interface{})
@@ -36,6 +41,11 @@ func (e StringExtractor) Extract(buf []byte) (storage.Message, error) {
 	msg["msg"] = string(buf)
 	return msg, nil
 }
+
+func (e StringExtractor) Name() string {
+	return ExtractorString
+}
+
 
 type ZlibJsonExtractor struct{}
 
@@ -56,6 +66,11 @@ func (e ZlibJsonExtractor) Extract(buf []byte) (storage.Message, error) {
 	}
 	return msg, nil
 }
+
+func (e ZlibJsonExtractor) Name() string {
+	return ExtractorZlibJson
+}
+
 
 // Get extractor by name
 func GetExtractor(name string) (Extractor, error) {

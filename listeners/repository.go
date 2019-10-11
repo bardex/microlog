@@ -6,8 +6,8 @@ import (
 )
 
 type Repository struct {
-	db         *sql.DB
-	inMemory   []*Listener
+	db       *sql.DB
+	inMemory []*Listener
 }
 
 func (r *Repository) Init() error {
@@ -32,11 +32,41 @@ func (r *Repository) Close() error {
 }
 
 func (r *Repository) Add(listener *Listener) error {
-	args := sqlite3.NamedArgs{"$a": 1, "$b": "demo"}
-	c.Exec("INSERT INTO x VALUES($a, $b, $c)", args) // $c will be NULL
+	var err error
 
+	tx, err := r.db.Begin()
+	defer tx.Rollback()
 
-	listener.Id = id
+	if err != nil {
+		return err
+	}
+
+	stmt, err := tx.Prepare(`insert into listeners (protocol, extractor, addr, active, date_edit) 
+values(?, ?, ?, ?, CURRENT_TIMESTAMP)`)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	result, err := stmt.Exec(listener.Protocol, listener.Extractor.Name(), listener.Addr, listener.Active)
+
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
+
+	if err != nil {
+		return err
+	}
+
+	listener.Id, err = result.LastInsertId()
+
+	if err != nil {
+		return err
+	}
 
 	r.inMemory = append(r.inMemory, listener)
 
@@ -72,7 +102,7 @@ func (r *Repository) Find(id int64) (*Listener, error) {
 
 func NewRepository(db *sql.DB) (*Repository, error) {
 	repo := &Repository{
-		db:         db,
+		db: db,
 	}
 	repo.Init()
 	return repo, nil

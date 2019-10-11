@@ -26,7 +26,12 @@ func TestRepository(t *testing.T) {
 
 	listener := NewListenerByParams(ProtocolTcp, ":8090", ExtractorJson)
 
-	repo.Add(listener)
+
+	err = repo.Add(listener)
+
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if listener.Id == 0 {
 		t.Fatal("listener.Id not set")
